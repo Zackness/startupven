@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  CLIENTE
+  VENDEDOR
+  EDITOR
+  ADMIN
+}
+
+enum Gremio {
+  ESTUDIANTIL
+  OBRERO
+  PROFESORES
+}
+
+model User {
+  id               String    @id @default(cuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  email            String    @unique
+  emailVerified    Boolean   @default(false)
+  name             String
+  image            String?
+  role             UserRole  @default(CLIENTE)
+  gremio           Gremio?
+  cedula           String?
+  expediente       String?   // Solo estudiantes
+  primerNombre     String?
+  segundoNombre    String?
+  primerApellido   String?
+  segundoApellido  String?
+  accounts         Account[]
+  sessions         Session[]
+  tickets          Ticket[]
+}
+
+// Tipos de ticket (ej. Desayuno, Comida)
+model TicketType {
+  id          String   @id @default(cuid())
+  name        String   // "Desayuno", "Comida", etc.
+  price       Decimal  @db.Decimal(10, 2)
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tickets     Ticket[]
+}
+
+// Ticket comprado por un usuario (una comida canjeable)
+model Ticket {
+  id           String     @id @default(cuid())
+  userId       String
+  ticketTypeId String
+  mealDate     DateTime   @db.Date // Día para el que es válido el ticket
+  usedAt       DateTime?  // Cuando se canjeó (null = pendiente)
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  @@index([userId])
+  @@index([mealDate])
+}
+
+model Account {
+  id                   String    @id @default(cuid())
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  userId               String
+  providerId           String
+  accountId            String
+  accessToken          String?
+  refreshToken         String?
+  idToken              String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                String?
+  password             String?
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([providerId, accountId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  value     String
+  expiresAt DateTime
+  identifier String
+}
