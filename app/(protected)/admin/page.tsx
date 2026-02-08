@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ADMIN_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { Ticket, CalendarDays, UtensilsCrossed } from "lucide-react";
+import { BarChart, PieChart } from "./admin-charts";
 
 export default async function AdminPage() {
   const stats = await getAdminStats();
@@ -66,15 +67,47 @@ export default async function AdminPage() {
         </div>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <p className="text-sm font-medium text-zinc-600">Total usuarios</p>
+          <p className="mt-1 text-3xl font-bold text-black">{stats.totalUsers}</p>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-600">
+            {stats.usersByRole.map((r) => (
+              <span key={r.role} className="rounded-full bg-zinc-100 px-2 py-1">
+                {r.role}: <span className="font-semibold text-black">{r.count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <PieChart
+          title="Estado de tickets"
+          data={[
+            { label: "Pendiente", value: stats.ticketsPending, color: "#f59e0b" },
+            { label: "Canjeado", value: stats.ticketsUsed, color: "#16a34a" },
+          ]}
+          className="lg:col-span-1"
+        />
+
+        <BarChart
+          title="Tickets por fecha menú (últimos 7 días)"
+          data={stats.ticketsLast7Days.map((d) => ({
+            label: d.date.slice(5), // MM-DD
+            value: d.count,
+          }))}
+          className="lg:col-span-1"
+        />
+      </div>
+
       <div className="flex flex-wrap gap-4">
         <Link href={`${ADMIN_PATH}/tickets`}>
           <Button className="bg-black text-white hover:bg-zinc-800">Ver todos los tickets</Button>
         </Link>
         <Link href={`${ADMIN_PATH}/tipos`}>
-          <Button variant="outline" className="border-zinc-300 text-black hover:bg-zinc-50">Gestionar tipos de ticket</Button>
+          <Button className="bg-black text-white hover:bg-zinc-800">Gestionar tipos de ticket</Button>
         </Link>
         <Link href={`${ADMIN_PATH}/usuarios`}>
-          <Button variant="outline" className="border-zinc-300 text-black hover:bg-zinc-50">Administrar usuarios</Button>
+          <Button className="bg-black text-white hover:bg-zinc-800">Administrar usuarios</Button>
         </Link>
       </div>
     </div>

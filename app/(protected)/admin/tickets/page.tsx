@@ -1,5 +1,10 @@
-import { getAdminTickets } from "@/lib/actions/tickets";
+import {
+  getAdminTicketTypes,
+  getAdminTicketsFiltered,
+  getAdminUsersForTicketsFilter,
+} from "@/lib/actions/tickets";
 import { MarkUsedButton } from "./mark-used-button";
+import { TicketFilters } from "./ticket-filters";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -13,13 +18,38 @@ function formatDate(d: Date) {
 export default async function AdminTicketsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    tipo?: string;
+    usuario?: string;
+    fecha?: string;
+    cedula?: string;
+    expediente?: string;
+  }>;
 }) {
-  const { page } = await searchParams;
+  const { page, tipo, usuario, fecha, cedula, expediente } = await searchParams;
   const pageNum = Math.max(0, parseInt(page ?? "0", 10));
   const pageSize = 20;
-  const { tickets, total } = await getAdminTickets(pageNum, pageSize);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const [users, types, ticketsResult] = await Promise.all([
+    getAdminUsersForTicketsFilter(),
+    getAdminTicketTypes(),
+    getAdminTicketsFiltered(pageNum, pageSize, { tipo, usuario, fecha, cedula, expediente }),
+  ]);
+  const { tickets, total } = ticketsResult;
   const totalPages = Math.ceil(total / pageSize);
+
+  function pageHref(nextPage: number) {
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+    if (tipo) params.set("tipo", tipo);
+    if (usuario) params.set("usuario", usuario);
+    if (fecha) params.set("fecha", fecha);
+    if (cedula) params.set("cedula", cedula);
+    if (expediente) params.set("expediente", expediente);
+    return `/admin/tickets?${params.toString()}`;
+  }
 
   return (
     <div className="space-y-6">
@@ -31,6 +61,12 @@ export default async function AdminTicketsPage({
           Listado de todos los tickets y estado de canje
         </p>
       </div>
+
+      <TicketFilters
+        users={users}
+        types={types.map((t) => ({ id: t.id, name: t.name }))}
+        initial={{ tipo, usuario, fecha, cedula, expediente }}
+      />
 
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <div className="overflow-x-auto">
@@ -46,6 +82,9 @@ export default async function AdminTicketsPage({
             </thead>
             <tbody>
               {tickets.map((t) => (
+                (() => {
+                  const isCancelled = !t.usedAt && t.mealDate < todayStart;
+                  return (
                 <tr key={t.id} className="border-b border-zinc-100">
                   <td className="px-4 py-3">
                     <p className="font-medium text-black">{t.userName}</p>
@@ -58,6 +97,10 @@ export default async function AdminTicketsPage({
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
                         Canjeado
                       </span>
+                    ) : isCancelled ? (
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                        Cancelado
+                      </span>
                     ) : (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
                         Pendiente
@@ -65,9 +108,15 @@ export default async function AdminTicketsPage({
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {!t.usedAt && <MarkUsedButton ticketId={t.id} />}
+                    {!t.usedAt && !isCancelled ? (
+                      <MarkUsedButton ticketId={t.id} />
+                    ) : isCancelled ? (
+                      <span className="text-xs text-zinc-500">Vencido</span>
+                    ) : null}
                   </td>
                 </tr>
+                  );
+                })()
               ))}
             </tbody>
           </table>
@@ -83,7 +132,7 @@ export default async function AdminTicketsPage({
         <div className="flex justify-center gap-2">
           {pageNum > 0 && (
             <a
-              href={`/admin/tickets?page=${pageNum - 1}`}
+              href={pageHref(pageNum - 1)}
               className="rounded-md border border-zinc-300 px-3 py-1 text-sm text-black hover:bg-zinc-50"
             >
               Anterior
@@ -94,7 +143,7 @@ export default async function AdminTicketsPage({
           </span>
           {pageNum < totalPages - 1 && (
             <a
-              href={`/admin/tickets?page=${pageNum + 1}`}
+              href={pageHref(pageNum + 1)}
               className="rounded-md border border-zinc-300 px-3 py-1 text-sm text-black hover:bg-zinc-50"
             >
               Siguiente

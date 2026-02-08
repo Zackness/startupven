@@ -39,7 +39,6 @@ export const authRoutes = [
     "/escritorio-2",
     "/escritorio-2/comprar",
     "/escritorio-2/mis-tickets",
-    "/admin"
 ];
 
 /**
@@ -60,6 +59,16 @@ export const ESCRITORIO_PATH = "/escritorio";
 export const ADMIN_PATH = "/admin";
 
 /**
+ * Ruta del panel de vendedor (VENDEDOR y ADMIN)
+ */
+export const VENDEDOR_PATH = "/vendedor";
+
+/**
+ * Ruta del panel de editor (EDITOR y ADMIN)
+ */
+export const EDITOR_PATH = "/editor";
+
+/**
  * Redirección por defecto tras login (usuario sin rol ADMIN)
  */
 export const DEFAULT_LOGIN_REDIRECT = ESCRITORIO_PATH;
@@ -68,6 +77,16 @@ export const DEFAULT_LOGIN_REDIRECT = ESCRITORIO_PATH;
  * Rutas que requieren rol ADMIN (solo estas prefijan /admin)
  */
 export const adminRoutesPrefix = ADMIN_PATH; // "/admin"
+
+/**
+ * Rutas que requieren rol VENDEDOR (y ADMIN)
+ */
+export const vendorRoutesPrefix = VENDEDOR_PATH; // "/vendedor"
+
+/**
+ * Rutas que requieren rol EDITOR (y ADMIN)
+ */
+export const editorRoutesPrefix = EDITOR_PATH; // "/editor"
 
 /**
  * Rutas protegidas del cliente (cualquier usuario logueado)
@@ -79,6 +98,8 @@ export const protectedClientPrefix = ESCRITORIO_PATH; // "/escritorio"
  */
 export function getLoginRedirect(role?: string | null): string {
   if (role === "ADMIN") return ADMIN_PATH;
+  if (role === "VENDEDOR") return VENDEDOR_PATH;
+  if (role === "EDITOR") return EDITOR_PATH;
   return ESCRITORIO_PATH;
 }
 

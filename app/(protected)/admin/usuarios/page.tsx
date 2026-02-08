@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ADMIN_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import { CreateUserForm } from "./create-user-form";
 
 const roleLabels: Record<string, string> = {
   CLIENTE: "Cliente",
@@ -49,6 +50,8 @@ export default async function AdminUsuariosPage() {
           Gestiona gremios, roles y datos de los usuarios
         </p>
       </div>
+
+      <CreateUserForm />
 
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div className="overflow-x-auto">

@@ -24,6 +24,7 @@ const LoginSchema = z.object({
   password: z.string().min(1, {
     message: "La contraseña es requerida",
   }),
+  rememberMe: z.boolean().optional(),
 });
 
 export const LoginForm = () => {
@@ -38,6 +39,7 @@ export const LoginForm = () => {
     defaultValues: {
       email: "",
       password: "",
+      rememberMe: true,
     },
   });
 
@@ -50,6 +52,7 @@ export const LoginForm = () => {
         email: values.email,
         password: values.password,
         callbackURL: DEFAULT_LOGIN_REDIRECT,
+        rememberMe: values.rememberMe,
       });
 
       if (signInError) {
@@ -114,6 +117,26 @@ export const LoginForm = () => {
                     </div>
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="rememberMe"
+              render={({ field }: { field: ControllerRenderProps<z.infer<typeof LoginSchema>, "rememberMe"> }) => (
+                <FormItem>
+                  <FormControl>
+                    <label className="flex items-center gap-2 text-sm text-zinc-700">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-zinc-300"
+                        checked={!!field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        disabled={isPending}
+                      />
+                      Mantener sesión activa
+                    </label>
+                  </FormControl>
                 </FormItem>
               )}
             />

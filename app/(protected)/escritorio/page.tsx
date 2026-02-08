@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getMyTickets, getTicketTypes } from "@/lib/actions/tickets";
 import { ESCRITORIO_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
-import { DemoTicketButton } from "@/app/escritorio/components/demo-ticket-button";
+import { DemoTicketButton } from "@/app/(protected)/escritorio/components/demo-ticket-button";
 import { Ticket, UtensilsCrossed } from "lucide-react";
 
 export default async function EscritorioPage() {
@@ -36,7 +36,7 @@ export default async function EscritorioPage() {
             </div>
           </div>
           <Link href={`${ESCRITORIO_PATH}/mis-tickets`} className="mt-4 block">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="bg-black text-white hover:bg-zinc-800">
               Ver mis tickets
             </Button>
           </Link>

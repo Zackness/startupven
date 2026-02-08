@@ -1,6 +1,6 @@
 import { getMyTickets } from "@/lib/actions/tickets";
 import { TicketQR } from "@/components/ticket-qr";
-import { Ticket, CheckCircle, Clock } from "lucide-react";
+import { Ticket, CheckCircle, Clock, XCircle } from "lucide-react";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -43,8 +43,10 @@ export default async function MisTicketsPage() {
               className="flex flex-wrap items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 sm:flex-nowrap"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {t.usedAt ? (
+                {t.status === "CANJEADO" ? (
                   <CheckCircle className="h-5 w-5 shrink-0 text-green-600" />
+                ) : t.status === "CANCELADO" ? (
+                  <XCircle className="h-5 w-5 shrink-0 text-red-600" />
                 ) : (
                   <Clock className="h-5 w-5 shrink-0 text-amber-500" />
                 )}
@@ -54,20 +56,23 @@ export default async function MisTicketsPage() {
                   </p>
                   <p className="text-sm text-zinc-600">
                     {formatDate(t.mealDate)}
-                    {t.usedAt && " · Canjeado"}
+                    {t.status === "CANJEADO" && " · Canjeado"}
+                    {t.status === "CANCELADO" && " · Cancelado (vencido)"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <TicketQR ticketId={t.id} />
+                {t.status !== "CANCELADO" && <TicketQR ticketId={t.id} />}
                 <span
                   className={
-                    t.usedAt
+                    t.status === "CANJEADO"
                       ? "rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+                      : t.status === "CANCELADO"
+                        ? "rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800"
                       : "rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
                   }
                 >
-                  {t.usedAt ? "Canjeado" : "Pendiente"}
+                  {t.status === "CANJEADO" ? "Canjeado" : t.status === "CANCELADO" ? "Cancelado" : "Pendiente"}
                 </span>
               </div>
             </li>

@@ -10,6 +10,7 @@ import { USER_ROLES, USER_GREMIOS } from "@/routes";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { useState } from "react";
+import type { Gremio } from "@/lib/generated/prisma/enums";
 
 type User = {
   id: string;
@@ -38,20 +39,24 @@ export function EditUserForm({ user }: { user: User }) {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
+    const manualName = (formData.get("name") as string)?.trim() || "";
     const primerNombre = (formData.get("primerNombre") as string)?.trim() || null;
     const segundoNombre = (formData.get("segundoNombre") as string)?.trim() || null;
     const primerApellido = (formData.get("primerApellido") as string)?.trim() || null;
     const segundoApellido = (formData.get("segundoApellido") as string)?.trim() || null;
-    const name =
-      [primerNombre, segundoNombre, primerApellido, segundoApellido]
-        .filter(Boolean)
-        .join(" ") || user.name || user.email;
+    const gremioRaw = (formData.get("gremio") as string)?.trim() || "";
+    const gremio = (gremioRaw ? (gremioRaw as Gremio) : null) satisfies Gremio | null;
+    const derivedName =
+      [primerNombre, segundoNombre, primerApellido, segundoApellido].filter(Boolean).join(" ") ||
+      user.name ||
+      user.email;
+    const name = manualName || derivedName;
 
     startTransition(async () => {
       try {
         await updateUser(user.id, {
           role: formData.get("role") as "CLIENTE" | "VENDEDOR" | "EDITOR" | "ADMIN",
-          gremio: (formData.get("gremio") as string) || null,
+          gremio,
           cedula: (formData.get("cedula") as string)?.trim() || null,
           expediente: (formData.get("expediente") as string)?.trim() || null,
           primerNombre,
@@ -71,6 +76,21 @@ export function EditUserForm({ user }: { user: User }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <label htmlFor="name" className="text-sm font-medium text-black">
+            Nombre completo
+          </label>
+          <Input
+            id="name"
+            name="name"
+            defaultValue={user.name ?? ""}
+            placeholder="Ej. Juan Carlos Pérez López"
+            disabled={isPending}
+          />
+          <p className="text-xs text-zinc-500">
+            Si lo dejas vacío, se calculará automáticamente con los campos de nombre/apellido.
+          </p>
+        </div>
         <div className="space-y-2">
           <label htmlFor="primerNombre" className="text-sm font-medium text-black">
             Primer nombre

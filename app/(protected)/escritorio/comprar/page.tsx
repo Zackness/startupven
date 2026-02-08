@@ -1,6 +1,6 @@
 import { getTicketTypes } from "@/lib/actions/tickets";
 import { BuyTicketForm } from "./buy-ticket-form";
-import { DemoTicketButton } from "@/app/escritorio/components/demo-ticket-button";
+import { DemoTicketButton } from "@/app/(protected)/escritorio/components/demo-ticket-button";
 
 export default async function ComprarPage() {
   const types = await getTicketTypes();

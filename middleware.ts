@@ -4,6 +4,8 @@ import {
   publicRoutes,
   getLoginRedirect,
   adminRoutesPrefix,
+  vendorRoutesPrefix,
+  editorRoutesPrefix,
   protectedClientPrefix,
   ESCRITORIO_PATH,
 } from "@/routes";
@@ -31,6 +33,10 @@ export default async function middleware(req: NextRequest) {
   }
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isAdminRoute = nextUrl.pathname === adminRoutesPrefix || nextUrl.pathname.startsWith(adminRoutesPrefix + "/");
+  const isVendorRoute =
+    nextUrl.pathname === vendorRoutesPrefix || nextUrl.pathname.startsWith(vendorRoutesPrefix + "/");
+  const isEditorRoute =
+    nextUrl.pathname === editorRoutesPrefix || nextUrl.pathname.startsWith(editorRoutesPrefix + "/");
   const isClientProtectedRoute =
     nextUrl.pathname === protectedClientPrefix || nextUrl.pathname.startsWith(protectedClientPrefix + "/");
 
@@ -84,6 +90,28 @@ export default async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl));
     }
     if (role !== "ADMIN") {
+      return NextResponse.redirect(new URL(ESCRITORIO_PATH, nextUrl));
+    }
+    return;
+  }
+
+  if (isVendorRoute) {
+    if (!isLoggedIn) {
+      const callbackUrl = encodeURIComponent(nextUrl.pathname + nextUrl.search);
+      return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl));
+    }
+    if (role !== "ADMIN" && role !== "VENDEDOR") {
+      return NextResponse.redirect(new URL(ESCRITORIO_PATH, nextUrl));
+    }
+    return;
+  }
+
+  if (isEditorRoute) {
+    if (!isLoggedIn) {
+      const callbackUrl = encodeURIComponent(nextUrl.pathname + nextUrl.search);
+      return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl));
+    }
+    if (role !== "ADMIN" && role !== "EDITOR") {
       return NextResponse.redirect(new URL(ESCRITORIO_PATH, nextUrl));
     }
     return;
