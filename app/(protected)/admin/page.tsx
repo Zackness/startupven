@@ -83,8 +83,10 @@ export default async function AdminPage() {
         <PieChart
           title="Estado de tickets"
           data={[
-            { label: "Pendiente", value: stats.ticketsPending, color: "#f59e0b" },
-            { label: "Canjeado", value: stats.ticketsUsed, color: "#16a34a" },
+            { label: "Pendiente", value: stats.ticketsPendingPayment, color: "#f59e0b" }, // Amber-500
+            { label: "Canjeado", value: stats.ticketsRedeemed, color: "#16a34a" }, // Green-600
+            { label: "Vencido", value: stats.ticketsExpired, color: "#dc2626" }, // Red-600
+            { label: "Disponible", value: stats.ticketsAvailable, color: "#2563eb" }, // Blue-600
           ]}
           className="lg:col-span-1"
         />
@@ -97,18 +99,6 @@ export default async function AdminPage() {
           }))}
           className="lg:col-span-1"
         />
-      </div>
-
-      <div className="flex flex-wrap gap-4">
-        <Link href={`${ADMIN_PATH}/tickets`}>
-          <Button className="bg-black text-white hover:bg-zinc-800">Ver todos los tickets</Button>
-        </Link>
-        <Link href={`${ADMIN_PATH}/tipos`}>
-          <Button className="bg-black text-white hover:bg-zinc-800">Gestionar tipos de ticket</Button>
-        </Link>
-        <Link href={`${ADMIN_PATH}/usuarios`}>
-          <Button className="bg-black text-white hover:bg-zinc-800">Administrar usuarios</Button>
-        </Link>
       </div>
     </div>
   );

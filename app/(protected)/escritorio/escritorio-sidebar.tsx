@@ -8,7 +8,7 @@ import { ESCRITORIO_PATH } from "@/routes";
 
 const items = [
   { href: ESCRITORIO_PATH, label: "Inicio", icon: Home },
-  { href: `${ESCRITORIO_PATH}/comprar`, label: "Comprar ticket", icon: ShoppingCart },
+  { href: `${ESCRITORIO_PATH}/billetera`, label: "Billetera", icon: ShoppingCart }, // Using ShoppingCart or Wallet icon if available
   { href: `${ESCRITORIO_PATH}/mis-tickets`, label: "Mis tickets", icon: Ticket },
 ] as const;
 
@@ -29,7 +29,7 @@ export function EscritorioSidebar({ onNavigate }: { onNavigate?: () => void }) {
             onClick={() => onNavigate?.()}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              isActive ? "bg-black text-white" : "text-zinc-700 hover:bg-zinc-100 hover:text-black"
+              isActive ? "bg-blue-800 text-white" : "text-zinc-700 hover:bg-zinc-100 hover:text-black"
             )}
           >
             <Icon className="h-4 w-4" />

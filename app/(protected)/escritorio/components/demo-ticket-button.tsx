@@ -21,7 +21,7 @@ export function DemoTicketButton() {
     <Button
       type="button"
       variant="outline"
-      className="bg-black text-white hover:bg-zinc-800"
+      className="bg-black text-white hover:text-white hover:bg-zinc-800"
       disabled={isPending}
       onClick={handleClick}
     >

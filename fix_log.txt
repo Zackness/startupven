@@ -1,0 +1,41 @@
+Starting fix_prisma.sh with FNM
+FNM List:
+* v22.12.0 default
+* system
+Trying fnm use default
+Using Node for alias default
+Node: /run/user/1000/fnm_multishells/146154_1770535404368/bin/node
+Version: v22.12.0
+Npx: /run/user/1000/fnm_multishells/146154_1770535404368/bin/npx
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+Error: Prisma schema validation - (get-dmmf wasm)
+Error code: P1012
+[1;91merror[0m: [1mError validating field `user` in model `PaymentReport`: The relation field `user` on model `PaymentReport` is missing an opposite relation field on the model `User`. Either run `prisma format` or add it manually.[0m
+  [1;94m-->[0m  [4mprisma/schema.prisma:123[0m
+[1;94m   | [0m
+[1;94m122 | [0m  
+[1;94m123 | [0m  [1;91muser        User                @relation(fields: [userId], references: [id], onDelete: Cascade)[0m
+[1;94m124 | [0m  
+[1;94m   | [0m
+
+Validation Error Count: 1
+[Context: getDmmf]
+
+Prisma CLI Version : 7.3.0
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+Datasource "db": MySQL database "nrektwbx_unexpo-comedor" at "66.225.221.133:3306"
+Error: P1012
+
+error: Error validating field `user` in model `PaymentReport`: The relation field `user` on model `PaymentReport` is missing an opposite relation field on the model `User`. Either run `prisma format` or add it manually.
+  -->  prisma/schema.prisma:123
+   | 
+122 |   
+123 |   user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+124 |   
+   | 
+
+

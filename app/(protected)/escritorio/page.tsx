@@ -1,12 +1,24 @@
 import Link from "next/link";
-import { getMyTickets, getTicketTypes } from "@/lib/actions/tickets";
+import { getMyTickets, getTicketTypes, processExpiredTickets } from "@/lib/actions/tickets";
+import { getWalletBalance } from "@/lib/actions/wallet";
 import { ESCRITORIO_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { DemoTicketButton } from "@/app/(protected)/escritorio/components/demo-ticket-button";
-import { Ticket, UtensilsCrossed } from "lucide-react";
+import { Ticket } from "lucide-react";
+import { MenuContainer } from "./_components/menu-container";
+import { WalletCard } from "./_components/wallet-card";
 
 export default async function EscritorioPage() {
-  const [tickets, types] = await Promise.all([getMyTickets(), getTicketTypes()]);
+  // 1. Process expired tickets (auto-refund)
+  await processExpiredTickets();
+
+  // 2. Fetch data
+  const [tickets, types, wallet] = await Promise.all([
+    getMyTickets(),
+    getTicketTypes(),
+    getWalletBalance(),
+  ]);
+
   const pendientes = tickets.filter((t) => !t.usedAt).length;
 
   return (
@@ -16,11 +28,13 @@ export default async function EscritorioPage() {
           Escritorio
         </h1>
         <p className="mt-1 text-zinc-600">
-          Gestiona tus tickets de comedor universitario
+          Gestiona tus tickets y compras del comedor.
         </p>
       </div>
 
+      {/* Top Stats */}
       <div className="grid gap-4 sm:grid-cols-2">
+        {/* Tickets Pendientes */}
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-zinc-100 p-2">
@@ -36,44 +50,20 @@ export default async function EscritorioPage() {
             </div>
           </div>
           <Link href={`${ESCRITORIO_PATH}/mis-tickets`} className="mt-4 block">
-            <Button variant="outline" size="sm" className="bg-black text-white hover:bg-zinc-800">
+            <Button variant="outline" size="sm" className="bg-blue-800 text-white hover:bg-blue-600 hover:text-white w-full">
               Ver mis tickets
             </Button>
           </Link>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-green-100 p-2">
-              <UtensilsCrossed className="h-6 w-6 text-green-700" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-600">
-                Tipos disponibles
-              </p>
-              <p className="text-2xl font-bold text-black">
-                {types.length}
-              </p>
-            </div>
-          </div>
-          <Link href={`${ESCRITORIO_PATH}/comprar`} className="mt-4 block">
-            <Button size="sm" className="bg-black text-white hover:bg-zinc-800">Comprar ticket</Button>
-          </Link>
-        </div>
+
+        {/* Wallet Balance */}
+        <WalletCard balance={wallet.balance} />
       </div>
 
-      {tickets.length === 0 && (
-        <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center">
-          <p className="text-zinc-600">
-            Aún no tienes tickets. Compra tu primer ticket para el comedor o genera uno de ejemplo.
-          </p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            <Link href={`${ESCRITORIO_PATH}/comprar`}>
-              <Button className="bg-black text-white hover:bg-zinc-800">Comprar ticket</Button>
-            </Link>
-            <DemoTicketButton />
-          </div>
-        </div>
-      )}
+      {/* Main Menu / Purchasing Area */}
+      <div className="mt-8">
+        <MenuContainer types={types} balance={wallet.balance} />
+      </div>
     </div>
   );
 }

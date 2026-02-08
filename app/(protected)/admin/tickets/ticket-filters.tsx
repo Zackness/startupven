@@ -182,7 +182,7 @@ export function TicketFilters(props: {
             type="button"
             variant="outline"
             onClick={clearFilters}
-            className="border-zinc-300"
+            className="border-zinc-300 text-white hover:text-white bg-red-800 hover:bg-red-600"
           >
             <X className="h-4 w-4" />
             Limpiar

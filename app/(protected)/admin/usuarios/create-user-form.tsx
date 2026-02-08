@@ -124,7 +124,7 @@ export function CreateUserForm() {
         <FormSuccess message={success} />
 
         <div className="flex gap-3">
-          <Button type="submit" disabled={isPending} className="bg-black text-white hover:bg-zinc-800">
+          <Button type="submit" disabled={isPending} className="bg-blue-800 text-white hover:text-white hover:bg-blue-600">
             {isPending ? "Creando..." : "Crear usuario"}
           </Button>
         </div>

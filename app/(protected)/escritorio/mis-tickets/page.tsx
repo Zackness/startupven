@@ -45,10 +45,12 @@ export default async function MisTicketsPage() {
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {t.status === "CANJEADO" ? (
                   <CheckCircle className="h-5 w-5 shrink-0 text-green-600" />
-                ) : t.status === "CANCELADO" ? (
+                ) : t.status === "VENCIDO" ? (
                   <XCircle className="h-5 w-5 shrink-0 text-red-600" />
-                ) : (
+                ) : t.status === "PENDIENTE_PAGO" ? (
                   <Clock className="h-5 w-5 shrink-0 text-amber-500" />
+                ) : (
+                  <Ticket className="h-5 w-5 shrink-0 text-blue-600" />
                 )}
                 <div className="min-w-0">
                   <p className="font-medium text-black">
@@ -57,22 +59,30 @@ export default async function MisTicketsPage() {
                   <p className="text-sm text-zinc-600">
                     {formatDate(t.mealDate)}
                     {t.status === "CANJEADO" && " · Canjeado"}
-                    {t.status === "CANCELADO" && " · Cancelado (vencido)"}
+                    {t.status === "VENCIDO" && " · Vencido"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                {t.status !== "CANCELADO" && <TicketQR ticketId={t.id} />}
+                {t.status === "DISPONIBLE" && <TicketQR ticketId={t.id} />}
                 <span
                   className={
                     t.status === "CANJEADO"
                       ? "rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
-                      : t.status === "CANCELADO"
+                      : t.status === "VENCIDO"
                         ? "rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800"
-                      : "rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                        : t.status === "PENDIENTE_PAGO"
+                          ? "rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                          : "rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800"
                   }
                 >
-                  {t.status === "CANJEADO" ? "Canjeado" : t.status === "CANCELADO" ? "Cancelado" : "Pendiente"}
+                  {t.status === "CANJEADO"
+                    ? "Canjeado"
+                    : t.status === "VENCIDO"
+                      ? "Vencido"
+                      : t.status === "PENDIENTE_PAGO"
+                        ? "Pendiente de Pago"
+                        : "Comprado"}
                 </span>
               </div>
             </li>

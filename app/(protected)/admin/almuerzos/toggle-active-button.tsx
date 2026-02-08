@@ -23,6 +23,7 @@ export function ToggleActiveButton({ id, active }: { id: string; active: boolean
       size="sm"
       disabled={isPending}
       onClick={handleClick}
+      className="text-white hover:text-white bg-red-800 hover:bg-red-600"
     >
       {isPending ? "..." : active ? "Desactivar" : "Activar"}
     </Button>

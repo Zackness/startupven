@@ -1,0 +1,14 @@
+Starting build_check.sh with FNM
+Using Node for alias default
+Running tsc...
+app/(protected)/escritorio/_components/page.tsx(7,11): error TS2741: Property 'balance' is missing in type '{ types: { id: string; name: string; category: TicketCategory; price: number; description: string | null; image: string | null; availableForDate: Date | null; }[]; }' but required in type 'MenuContainerProps'.
+app/(protected)/escritorio/_components/wallet-card.tsx(4,10): error TS2305: Module '"@/lib/utils"' has no exported member 'formatCurrency'.
+app/(protected)/escritorio/billetera/page.tsx(4,10): error TS2305: Module '"@/lib/utils"' has no exported member 'formatCurrency'.
+app/(protected)/escritorio/billetera/top-up-form.tsx(6,23): error TS2307: Cannot find module '@/components/ui/label' or its corresponding type declarations.
+app/(protected)/escritorio/billetera/top-up-form.tsx(16,8): error TS2307: Cannot find module '@/components/ui/dialog' or its corresponding type declarations.
+lib/actions/wallet-reports.ts(15,14): error TS2339: Property 'paymentReport' does not exist on type 'PrismaClient'.
+lib/actions/wallet-reports.ts(34,21): error TS2339: Property 'paymentReport' does not exist on type 'PrismaClient'.
+lib/actions/wallet-reports.ts(48,33): error TS2339: Property 'paymentReport' does not exist on type 'Omit<PrismaClient<never, undefined, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">'.
+lib/actions/wallet-reports.ts(52,18): error TS2339: Property 'paymentReport' does not exist on type 'Omit<PrismaClient<never, undefined, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">'.
+lib/actions/wallet-reports.ts(83,14): error TS2339: Property 'paymentReport' does not exist on type 'PrismaClient'.
+TSC finished with code 2

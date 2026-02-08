@@ -4,6 +4,7 @@ import {
   getAdminUsersForTicketsFilter,
 } from "@/lib/actions/tickets";
 import { MarkUsedButton } from "./mark-used-button";
+import { ApproveButton } from "./approve-button";
 import { TicketFilters } from "./ticket-filters";
 
 function formatDate(d: Date) {
@@ -77,6 +78,7 @@ export default async function AdminTicketsPage({
                 <th className="px-4 py-3 font-medium text-black">Tipo</th>
                 <th className="px-4 py-3 font-medium text-black">Fecha menú</th>
                 <th className="px-4 py-3 font-medium text-black">Estado</th>
+                <th className="px-4 py-3 font-medium text-black">Pago</th>
                 <th className="px-4 py-3 font-medium text-black">Acción</th>
               </tr>
             </thead>
@@ -85,36 +87,52 @@ export default async function AdminTicketsPage({
                 (() => {
                   const isCancelled = !t.usedAt && t.mealDate < todayStart;
                   return (
-                <tr key={t.id} className="border-b border-zinc-100">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-black">{t.userName}</p>
-                    <p className="text-xs text-zinc-600">{t.userEmail}</p>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
-                  <td className="px-4 py-3 text-zinc-700">{formatDate(t.mealDate)}</td>
-                  <td className="px-4 py-3">
-                    {t.usedAt ? (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                        Canjeado
-                      </span>
-                    ) : isCancelled ? (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
-                        Cancelado
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                        Pendiente
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {!t.usedAt && !isCancelled ? (
-                      <MarkUsedButton ticketId={t.id} />
-                    ) : isCancelled ? (
-                      <span className="text-xs text-zinc-500">Vencido</span>
-                    ) : null}
-                  </td>
-                </tr>
+                    <tr key={t.id} className="border-b border-zinc-100">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-black">{t.userName}</p>
+                        <p className="text-xs text-zinc-600">{t.userEmail}</p>
+                      </td>
+                      <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
+                      <td className="px-4 py-3 text-zinc-700">{formatDate(t.mealDate)}</td>
+                      <td className="px-4 py-3">
+                        {t.paymentStatus === "PENDIENTE" ? (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                            Pendiente de Pago
+                          </span>
+                        ) : t.usedAt ? (
+                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            Canjeado
+                          </span>
+                        ) : isCancelled ? (
+                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                            Vencido
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                            Comprado
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {t.paymentReference || t.paymentBank ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium text-black">{t.paymentReference}</span>
+                            <span className="text-xs text-zinc-500">{t.paymentBank}</span>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 flex gap-2">
+                        {t.paymentStatus === "PENDIENTE" ? (
+                          <ApproveButton ticketId={t.id} />
+                        ) : !t.usedAt && !isCancelled ? (
+                          <MarkUsedButton ticketId={t.id} />
+                        ) : isCancelled ? (
+                          <span className="text-xs text-zinc-500">Vencido</span>
+                        ) : null}
+                      </td>
+                    </tr>
                   );
                 })()
               ))}

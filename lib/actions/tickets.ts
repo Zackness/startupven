@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { TicketPaymentStatus, TicketCategory } from "@/lib/generated/prisma/enums";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -14,8 +15,11 @@ export async function getTicketTypes() {
   return types.map((t) => ({
     id: t.id,
     name: t.name,
+    category: t.category,
     price: Number(t.price),
     description: t.description,
+    image: t.image,
+    availableForDate: t.availableForDate,
   }));
 }
 
@@ -41,17 +45,38 @@ export async function getMyTickets() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  return tickets.map((t) => ({
-    id: t.id,
-    ticketTypeName: t.ticketType.name,
-    mealDate: t.mealDate,
-    usedAt: t.usedAt,
-    createdAt: t.createdAt,
-    status: t.usedAt ? ("CANJEADO" as const) : t.mealDate < todayStart ? ("CANCELADO" as const) : ("PENDIENTE" as const),
-  }));
+  return tickets.map((t) => {
+    let status: "CANJEADO" | "VENCIDO" | "DISPONIBLE" | "PENDIENTE_PAGO";
+
+    if (t.paymentStatus === "PENDIENTE") {
+      status = "PENDIENTE_PAGO";
+    } else if (t.usedAt) {
+      status = "CANJEADO";
+    } else if (t.mealDate < todayStart) {
+      status = "VENCIDO";
+    } else {
+      status = "DISPONIBLE";
+    }
+
+    return {
+      id: t.id,
+      ticketTypeName: t.ticketType.name,
+      mealDate: t.mealDate,
+      usedAt: t.usedAt,
+      createdAt: t.createdAt,
+      status,
+      paymentStatus: t.paymentStatus,
+    };
+  });
 }
 
-export async function buyTicket(ticketTypeId: string, mealDate: Date) {
+export async function buyTicket(
+  ticketTypeId: string,
+  mealDate: Date,
+  paymentMethod: string = "PAGO_MOVIL",
+  paymentReference?: string,
+  paymentBank?: string
+) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
@@ -60,13 +85,57 @@ export async function buyTicket(ticketTypeId: string, mealDate: Date) {
   });
   if (!type) throw new Error("Tipo de ticket no disponible");
 
+  if (paymentMethod === "WALLET") {
+    return await db.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({ where: { id: session.user.id } });
+      if (!user) throw new Error("Usuario no encontrado");
+
+      if (user.balance.lessThan(type.price)) {
+        throw new Error("Saldo insuficiente");
+      }
+
+      // Deduct balance
+      await tx.user.update({
+        where: { id: user.id },
+        data: { balance: { decrement: type.price } }
+      });
+
+      // Create Transaction
+      await tx.walletTransaction.create({
+        data: {
+          userId: user.id,
+          amount: type.price.negated(),
+          type: "COMPRA",
+          reference: `Compra de ${type.name}`,
+        }
+      });
+
+      // Create Ticket
+      await tx.ticket.create({
+        data: {
+          userId: session.user.id,
+          ticketTypeId: type.id,
+          mealDate: new Date(mealDate),
+          paymentStatus: "PAGADO", // Wallet payments are instant
+          paymentMethod,
+        },
+      });
+    });
+  }
+
+  // Default / Manual Payment
   await db.ticket.create({
     data: {
       userId: session.user.id,
       ticketTypeId: type.id,
       mealDate: new Date(mealDate),
+      paymentStatus: "PENDIENTE",
+      paymentMethod,
+      paymentReference,
+      paymentBank,
     },
   });
+
   revalidatePath("/escritorio");
   revalidatePath("/escritorio/mis-tickets");
 }
@@ -93,6 +162,7 @@ export async function createDemoTicket() {
       userId: session.user.id,
       ticketTypeId: type.id,
       mealDate: today,
+      paymentStatus: "PAGADO",
     },
   });
   revalidatePath("/escritorio");
@@ -117,8 +187,10 @@ export async function getAdminStats() {
     ticketTypesCount,
     totalUsers,
     usersByRoleRaw,
-    ticketsPending,
-    ticketsUsed,
+    ticketsPendingPayment,
+    ticketsRedeemed,
+    ticketsExpired,
+    ticketsAvailable,
     ticketsByDayRaw,
   ] = await Promise.all([
     db.ticket.count(),
@@ -137,8 +209,22 @@ export async function getAdminStats() {
       _count: { _all: true },
       orderBy: { role: "asc" },
     }),
-    db.ticket.count({ where: { usedAt: null } }),
+    db.ticket.count({ where: { paymentStatus: "PENDIENTE" } }),
     db.ticket.count({ where: { usedAt: { not: null } } }),
+    db.ticket.count({
+      where: {
+        paymentStatus: "PAGADO",
+        usedAt: null,
+        mealDate: { lt: todayStart },
+      },
+    }),
+    db.ticket.count({
+      where: {
+        paymentStatus: "PAGADO",
+        usedAt: null,
+        mealDate: { gte: todayStart },
+      },
+    }),
     db.ticket.groupBy({
       by: ["mealDate"],
       where: { mealDate: { gte: last7Start, lt: todayEnd } },
@@ -164,8 +250,10 @@ export async function getAdminStats() {
     ticketTypesCount,
     totalUsers,
     usersByRole: usersByRoleRaw.map((r) => ({ role: r.role, count: r._count._all })),
-    ticketsPending,
-    ticketsUsed,
+    ticketsPendingPayment,
+    ticketsRedeemed,
+    ticketsExpired,
+    ticketsAvailable,
     ticketsLast7Days,
   };
 }
@@ -197,6 +285,9 @@ export async function getAdminTickets(page = 0, pageSize = 20) {
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
+      paymentStatus: t.paymentStatus,
+      paymentReference: t.paymentReference,
+      paymentBank: t.paymentBank,
       createdAt: t.createdAt,
     })),
     total,
@@ -279,6 +370,7 @@ export async function createManualSale(input: {
       ticketTypeId: type.id,
       mealDate,
       usedAt,
+      paymentStatus: "PAGADO",
     })),
   });
 
@@ -344,6 +436,9 @@ export async function getAdminTicketsFiltered(
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
+      paymentStatus: t.paymentStatus,
+      paymentReference: t.paymentReference,
+      paymentBank: t.paymentBank,
       createdAt: t.createdAt,
     })),
     total,
@@ -383,7 +478,7 @@ export async function getAdminUsersForTicketsFilter() {
   }));
 }
 
-export async function getAdminTicketTypes() {
+export async function getAdminTicketTypes(): Promise<Prisma.TicketTypeGetPayload<object>[]> {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
@@ -401,15 +496,33 @@ export async function createTicketType(formData: FormData) {
   if (user.role !== "ADMIN") redirect("/escritorio");
 
   const name = formData.get("name") as string;
+  const category = (formData.get("category") as any) || "ALMUERZO";
   const price = formData.get("price") as string;
   const description = (formData.get("description") as string) || null;
+  const image = (formData.get("image") as string) || null;
+  const availableForDateStr = formData.get("availableForDate") as string;
+
   if (!name || !price) throw new Error("Nombre y precio son requeridos");
+
+  let availableForDate: Date | null = null;
+  if (availableForDateStr) {
+    const d = new Date(availableForDateStr);
+    d.setHours(0, 0, 0, 0);
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(availableForDateStr);
+    if (m) {
+      availableForDate = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      availableForDate.setHours(0, 0, 0, 0);
+    }
+  }
 
   await db.ticketType.create({
     data: {
       name: name.trim(),
+      category: category,
       price: parseFloat(price),
       description: description?.trim() || null,
+      image,
+      availableForDate,
     },
   });
   revalidatePath("/admin");
@@ -441,9 +554,10 @@ export async function markTicketUsed(ticketId: string) {
 
   const ticket = await db.ticket.findUnique({
     where: { id: ticketId },
-    select: { id: true, usedAt: true, mealDate: true },
+    select: { id: true, usedAt: true, mealDate: true, paymentStatus: true },
   });
   if (!ticket) throw new Error("Ticket no encontrado");
+  if (ticket.paymentStatus !== "PAGADO") throw new Error("Ticket pendiente de pago");
   if (ticket.usedAt) return;
 
   const todayStart = new Date();
@@ -457,4 +571,73 @@ export async function markTicketUsed(ticketId: string) {
     data: { usedAt: new Date() },
   });
   revalidatePath("/admin/tickets");
+}
+
+export async function approveTicket(ticketId: string) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const user = session.user as unknown as { role?: string };
+  if (user.role !== "ADMIN") redirect("/escritorio");
+
+  await db.ticket.update({
+    where: { id: ticketId },
+    data: { paymentStatus: "PAGADO" },
+  });
+  revalidatePath("/admin/tickets");
+}
+
+export async function processExpiredTickets() {
+  const session = await auth();
+  if (!session?.user) return; // Should probably be a cron or triggered by admin/system, but works on access for now
+
+  // Only run for the current user to avoid massive global queries on every request, 
+  // OR run globally if this is an admin action. 
+  // For the user dashboard, let's just process THEIR expired tickets to keep it snappy/safe.
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const expiredTickets = await db.ticket.findMany({
+    where: {
+      userId: session.user.id,
+      usedAt: null,
+      mealDate: { lt: todayStart },
+      paymentStatus: "PAGADO", // Only refund paid tickets
+    },
+    include: { ticketType: true }
+  });
+
+  if (expiredTickets.length === 0) return;
+
+  for (const ticket of expiredTickets) {
+    await db.$transaction(async (tx) => {
+      // Double check inside transaction
+      const t = await tx.ticket.findUnique({ where: { id: ticket.id } });
+      if (!t || t.paymentStatus !== "PAGADO") return;
+
+      // Refund
+      await tx.ticket.update({
+        where: { id: ticket.id },
+        data: { paymentStatus: "REEMBOLSADO" }
+      });
+
+      await tx.user.update({
+        where: { id: ticket.userId },
+        data: { balance: { increment: ticket.ticketType.price } }
+      });
+
+      await tx.walletTransaction.create({
+        data: {
+          userId: ticket.userId,
+          amount: ticket.ticketType.price,
+          type: "REEMBOLSO",
+          reference: `Reembolso por vencimiento: ${ticket.ticketType.name} (${ticket.mealDate.toISOString().slice(0, 10)})`
+        }
+      });
+    });
+  }
+
+  if (expiredTickets.length > 0) {
+    revalidatePath("/escritorio");
+  }
 }
