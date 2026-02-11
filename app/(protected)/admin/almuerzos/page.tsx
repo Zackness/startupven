@@ -1,6 +1,10 @@
+import Link from "next/link";
 import { getAdminTicketTypes } from "@/lib/actions/tickets";
 import { CreateTicketTypeForm } from "./create-ticket-type-form";
 import { ToggleActiveButton } from "./toggle-active-button";
+import { Button } from "@/components/ui/button";
+import { ADMIN_PATH } from "@/routes";
+import { Pencil } from "lucide-react";
 
 export default async function AdminTiposPage() {
   const types = await getAdminTicketTypes();
@@ -53,7 +57,15 @@ export default async function AdminTiposPage() {
                   {t.description && <span className="block text-xs text-zinc-500 mt-0.5">{t.description}</span>}
                 </div>
               </div>
-              <ToggleActiveButton id={t.id} active={t.active} />
+              <div className="flex items-center gap-2">
+                <Link href={`${ADMIN_PATH}/almuerzos/${t.id}`}>
+                  <Button variant="outline" size="sm" className="text-zinc-700 border-zinc-300 hover:bg-zinc-100">
+                    <Pencil className="h-4 w-4" />
+                    Editar
+                  </Button>
+                </Link>
+                <ToggleActiveButton id={t.id} active={t.active} />
+              </div>
             </li>
           ))}
         </ul>

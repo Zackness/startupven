@@ -526,7 +526,53 @@ export async function createTicketType(formData: FormData) {
     },
   });
   revalidatePath("/admin");
-  revalidatePath("/admin/tipos");
+  revalidatePath("/admin/almuerzos");
+}
+
+export async function updateTicketType(id: string, formData: FormData) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const user = session.user as unknown as { role?: string };
+  if (user.role !== "ADMIN") redirect("/escritorio");
+
+  const existing = await db.ticketType.findUnique({ where: { id } });
+  if (!existing) throw new Error("Plato no encontrado");
+
+  const name = (formData.get("name") as string)?.trim();
+  const category = (formData.get("category") as "DESAYUNO" | "ALMUERZO" | "CENA") || existing.category;
+  const priceStr = formData.get("price") as string;
+  const description = (formData.get("description") as string)?.trim() || null;
+  const image = (formData.get("image") as string) || null;
+  const availableForDateStr = formData.get("availableForDate") as string;
+  const active = formData.get("active") === "true";
+
+  if (!name) throw new Error("El nombre es requerido");
+
+  let availableForDate: Date | null = null;
+  if (availableForDateStr) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(availableForDateStr);
+    if (m) {
+      availableForDate = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      availableForDate.setHours(0, 0, 0, 0);
+    }
+  }
+
+  const price = priceStr ? parseFloat(priceStr) : Number(existing.price);
+
+  await db.ticketType.update({
+    where: { id },
+    data: {
+      name,
+      category,
+      price,
+      description,
+      image,
+      availableForDate,
+      active,
+    },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/admin/almuerzos");
 }
 
 export async function toggleTicketTypeActive(id: string) {
@@ -543,7 +589,7 @@ export async function toggleTicketTypeActive(id: string) {
     data: { active: !type.active },
   });
   revalidatePath("/admin");
-  revalidatePath("/admin/tipos");
+  revalidatePath("/admin/almuerzos");
 }
 
 export async function markTicketUsed(ticketId: string) {

@@ -15,6 +15,10 @@ export const auth = betterAuth({
   plugins: [nextCookies()],
   database: prismaAdapter(db, { provider: "mysql" }),
   user: {
+    changeEmail: {
+      enabled: true,
+      updateEmailWithoutVerification: true,
+    },
     additionalFields: {
       role: {
         type: "string",

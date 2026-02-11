@@ -75,3 +75,21 @@ export const RegisterSchema = z.object ({
         message: "Es necesario un nombre de usuario"
     }),
 });
+
+export const ChangeEmailSchema = z.object({
+  newEmail: z.string().email({
+    message: "Ingresa un correo electrónico válido",
+  }),
+});
+
+export const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1, {
+    message: "Ingresa tu contraseña actual",
+  }),
+  newPassword: z.string().min(8, {
+    message: "La nueva contraseña debe tener al menos 8 caracteres",
+  }),
+});
+
+export type ChangeEmailSchemaType = z.infer<typeof ChangeEmailSchema>;
+export type ChangePasswordSchemaType = z.infer<typeof ChangePasswordSchema>;

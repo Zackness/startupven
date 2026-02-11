@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { FaUser } from "react-icons/fa";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { ExitIcon } from "@radix-ui/react-icons";
+import { ExitIcon, PersonIcon } from "@radix-ui/react-icons";
 import { authClient } from "@/lib/better-auth-client";
+import { ESCRITORIO_PATH } from "@/routes";
 
 export const UserButton = () => {
     const user = useCurrentUser();
@@ -32,6 +34,12 @@ export const UserButton = () => {
                 </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40 border border-border bg-popover text-popover-foreground rounded-xl p-1 shadow-lg" align="end">
+                <DropdownMenuItem asChild>
+                    <Link href={`${ESCRITORIO_PATH}/cuenta`} className="flex cursor-pointer items-center">
+                        <PersonIcon className="h-4 w-4 mr-2" />
+                        Mi cuenta
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={onClick} className="cursor-pointer">
                     <ExitIcon className="h-4 w-4 mr-2" />
                     Salir
