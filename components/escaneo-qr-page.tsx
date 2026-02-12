@@ -3,7 +3,8 @@
 import { useState, useCallback } from "react";
 import { QRScanner } from "@/components/qr-scanner";
 import { ScanResultPanel, type TicketScanInfo } from "@/components/scan-result-panel";
-import { getTicketByIdForScan } from "@/lib/actions/tickets";
+import { getTicketByIdForScan, markTicketUsed } from "@/lib/actions/tickets";
+import { getTodayStartUTC } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function EscaneoQRPage() {
@@ -22,12 +23,28 @@ export function EscaneoQRPage() {
         toast.error("Ticket no encontrado");
         return;
       }
-      setTicket({
+      const mealDate = new Date(data.mealDate);
+      const usedAt = data.usedAt ? new Date(data.usedAt) : null;
+      const todayStart = getTodayStartUTC();
+      const isExpired = !usedAt && mealDate < todayStart;
+      const canAutoMark =
+        data.paymentStatus === "PAGADO" && !usedAt && !isExpired;
+
+      const ticketInfo: TicketScanInfo = {
         ...data,
-        mealDate: new Date(data.mealDate),
-        usedAt: data.usedAt ? new Date(data.usedAt) : null,
-      });
-      toast.success("Ticket leído");
+        mealDate,
+        usedAt,
+      };
+
+      if (canAutoMark) {
+        await markTicketUsed(data.id);
+        setTicket({ ...ticketInfo, usedAt: new Date() });
+        toast.success("Ticket canjeado");
+      } else {
+        setTicket(ticketInfo);
+        if (usedAt) toast.success("Ticket ya estaba canjeado");
+        else toast.success("Ticket leído");
+      }
     } catch {
       setTicket(null);
       setError("Error al consultar el ticket.");
@@ -59,17 +76,10 @@ export function EscaneoQRPage() {
         <div>
           <h2 className="mb-2 text-lg font-semibold text-black">Resultado</h2>
           <p className="mb-3 text-sm text-zinc-600">
-            Aquí se mostrarán los datos del ticket y podrás marcarlo como canjeado.
+            Un escaneo marca el ticket como canjeado. No se puede canjear dos veces.
           </p>
           {ticket ? (
-            <ScanResultPanel
-              ticket={ticket}
-              onMarked={() => {
-                setTicket((prev) =>
-                  prev ? { ...prev, usedAt: new Date() } : null
-                );
-              }}
-            />
+            <ScanResultPanel ticket={ticket} />
           ) : (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50/50 py-16 text-center">
               <p className="text-sm text-zinc-500">

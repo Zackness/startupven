@@ -63,7 +63,7 @@ export function MenuList({ types, selectedTypeId, onSelect }: MenuListProps) {
                                     </span>
                                     {isDateSpecific && type.availableForDate && (
                                         <span className="text-xs text-zinc-500">
-                                            📅 {new Date(type.availableForDate).toLocaleDateString("es-VE", { day: "numeric", month: "short" })}
+                                            📅 {new Date(type.availableForDate).toLocaleDateString("es-VE", { day: "numeric", month: "short", timeZone: "UTC" })}
                                         </span>
                                     )}
                                 </div>

@@ -11,7 +11,10 @@ import { TicketTypeOption } from "./types";
 
 function todayString() {
   const d = new Date();
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 interface BuyTicketFormProps {
@@ -116,7 +119,7 @@ export function BuyTicketForm({ types, preSelectedId, onSuccess, balance = 0 }: 
             {types.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name} — Bs. {t.price.toFixed(2)}
-                {t.availableForDate && ` (${new Date(t.availableForDate).toLocaleDateString()})`}
+                {t.availableForDate && ` (${new Date(t.availableForDate).toLocaleDateString("es-VE", { timeZone: "UTC" })})`}
               </option>
             ))}
           </select>
@@ -184,7 +187,7 @@ export function BuyTicketForm({ types, preSelectedId, onSuccess, balance = 0 }: 
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-zinc-700">Saldo Disponible:</span>
               <span className={`font-bold ${balance > 0 ? 'text-indigo-700' : 'text-red-600'}`}>
-                {balance.toFixed(2)} Ref.
+                Bs. {balance.toFixed(2)}
               </span>
             </div>
             {selectedType && balance < selectedType.price && (
@@ -200,7 +203,7 @@ export function BuyTicketForm({ types, preSelectedId, onSuccess, balance = 0 }: 
             <p className="text-sm text-blue-800">
               Realiza el pago móvil a los datos indicados y registra la referencia.
               <br />
-              <span className="font-bold">0412-1234567 | V-12345678 | Banco Mercantil</span>
+              <span className="font-bold">04245324034 | 24385660 | Banco del Tesoro</span>
             </p>
             <div>
               <div>

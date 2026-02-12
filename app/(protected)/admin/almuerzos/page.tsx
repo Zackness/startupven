@@ -54,7 +54,7 @@ export default async function AdminTiposPage() {
                   <span>Bs. {Number(t.price).toFixed(2)}</span>
                   {t.availableForDate && (
                     <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                      📅 {t.availableForDate.toLocaleDateString()}
+                      📅 {t.availableForDate.toLocaleDateString("es-VE", { timeZone: "UTC" })}
                     </span>
                   )}
                   {t.description && <span className="block text-xs text-zinc-500 mt-0.5">{t.description}</span>}

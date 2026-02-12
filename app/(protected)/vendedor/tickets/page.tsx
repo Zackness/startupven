@@ -1,4 +1,5 @@
 import { getAdminTicketTypes, getAdminTicketsFiltered } from "@/lib/actions/tickets";
+import { getTodayStartUTC } from "@/lib/utils";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -18,8 +19,7 @@ export default async function VendedorTicketsPage({
   const pageNum = Math.max(0, parseInt(page ?? "0", 10));
   const pageSize = 20;
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
 
   // Por defecto, el vendedor trabaja con el día de hoy
   const defaultYmd = new Date().toISOString().slice(0, 10);

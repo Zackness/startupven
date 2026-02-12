@@ -8,6 +8,7 @@ function formatDate(d: Date) {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   });
 }
 

@@ -6,11 +6,11 @@ import { TicketPaymentStatus, TicketCategory } from "@/lib/generated/prisma/enum
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getTodayStartUTC } from "@/lib/utils";
 
-/** Desactiva platos con fecha específica ya pasada */
+/** Desactiva platos con fecha específica ya pasada (compara en UTC como la BD). */
 async function deactivateExpiredTicketTypes() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayStartUTC();
   await db.ticketType.updateMany({
     where: {
       availableForDate: { lt: today },
@@ -57,8 +57,7 @@ export async function getMyTickets() {
     take: 50,
   });
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
 
   return tickets.map((t) => {
     let status: "CANJEADO" | "VENCIDO" | "DISPONIBLE" | "PENDIENTE_PAGO";
@@ -105,7 +104,9 @@ export async function buyTicket(
       const user = await tx.user.findUnique({ where: { id: session.user.id } });
       if (!user) throw new Error("Usuario no encontrado");
 
-      if (user.balance.lessThan(type.price)) {
+      const balanceNum = Number(user.balance);
+      const priceNum = Number(type.price);
+      if (balanceNum < priceNum) {
         throw new Error("Saldo insuficiente");
       }
 
@@ -190,11 +191,15 @@ export async function getAdminStats() {
   const user = session.user as unknown as { role?: string };
   if (user.role !== "ADMIN") redirect("/escritorio");
 
-  const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
-  const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
-
+  const todayStart = getTodayStartUTC();
+  const todayEnd = new Date(Date.UTC(
+    todayStart.getUTCFullYear(),
+    todayStart.getUTCMonth(),
+    todayStart.getUTCDate(),
+    23, 59, 59, 999
+  ));
   const last7Start = new Date(todayStart);
-  last7Start.setDate(todayStart.getDate() - 6);
+  last7Start.setUTCDate(last7Start.getUTCDate() - 6);
 
   const [
     totalTickets,
@@ -366,8 +371,7 @@ export async function createManualSale(input: {
 
   const mealDate = parseLocalYmd(input.mealDateYmd);
   if (!mealDate) throw new Error("Fecha inválida");
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
   if (mealDate < todayStart) throw new Error("No se pueden registrar ventas para fechas vencidas (ticket cancelado).");
 
   const type = await db.ticketType.findFirst({
@@ -707,8 +711,7 @@ export async function markTicketUsed(ticketId: string) {
   if (ticket.paymentStatus !== "PAGADO") throw new Error("Ticket pendiente de pago");
   if (ticket.usedAt) return;
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
   if (ticket.mealDate < todayStart) {
     throw new Error("Ticket cancelado: la fecha del menú ya venció.");
   }
@@ -743,8 +746,7 @@ export async function processExpiredTickets() {
   // OR run globally if this is an admin action. 
   // For the user dashboard, let's just process THEIR expired tickets to keep it snappy/safe.
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
 
   const expiredTickets = await db.ticket.findMany({
     where: {

@@ -6,6 +6,7 @@ import {
 import { MarkUsedButton } from "./mark-used-button";
 import { ApproveButton } from "./approve-button";
 import { TicketFilters } from "./ticket-filters";
+import { getTodayStartUTC } from "@/lib/utils";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -31,8 +32,7 @@ export default async function AdminTicketsPage({
   const { page, tipo, usuario, fecha, cedula, expediente } = await searchParams;
   const pageNum = Math.max(0, parseInt(page ?? "0", 10));
   const pageSize = 20;
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
   const [users, types, ticketsResult] = await Promise.all([
     getAdminUsersForTicketsFilter(),
     getAdminTicketTypes(),

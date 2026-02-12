@@ -29,11 +29,13 @@ const CategoryColors: Record<TicketCategory, string> = {
 
 export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
     const isDateSpecific = !!type.availableForDate;
+    // Fecha solo día (DB DATE): mostrar en UTC para no restar un día en zonas UTC-
     const dateStr = type.availableForDate
         ? new Date(type.availableForDate).toLocaleDateString("es-VE", {
             weekday: "short",
             day: "numeric",
             month: "short",
+            timeZone: "UTC",
         })
         : null;
 

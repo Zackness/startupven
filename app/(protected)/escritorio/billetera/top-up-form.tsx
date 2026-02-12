@@ -50,7 +50,7 @@ export function TopUpForm() {
                     <DialogDescription>
                         Realiza un pago móvil a los datos indicados y reportalo aquí.
                         <br />
-                        <span className="font-bold text-black">0412-1234567 | V-12345678 | Banco Mercantil</span>
+                        <span className="font-bold text-black">04245324034 | 24385660 | Banco del Tesoro</span>
                     </DialogDescription>
                 </DialogHeader>
 

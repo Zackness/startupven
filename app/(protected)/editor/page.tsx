@@ -5,6 +5,7 @@ import { EditorTicketFilters } from "./editor-ticket-filters";
 import Link from "next/link";
 import { ESCRITORIO_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
+import { getTodayStartUTC } from "@/lib/utils";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -23,8 +24,7 @@ export default async function EditorPage({
   const { page, cedula, fecha } = await searchParams;
   const pageNum = Math.max(0, parseInt(page ?? "0", 10));
   const pageSize = 20;
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = getTodayStartUTC();
 
   const { tickets, total } = await getEditorTicketsFiltered(pageNum, pageSize, {
     cedula: cedula ?? null,

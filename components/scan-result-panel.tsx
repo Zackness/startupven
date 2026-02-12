@@ -1,8 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { markTicketUsed } from "@/lib/actions/tickets";
+import { getTodayStartUTC } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 export type TicketScanInfo = {
@@ -15,34 +13,17 @@ export type TicketScanInfo = {
   paymentStatus: string;
 };
 
-export function ScanResultPanel({
-  ticket,
-  onMarked,
-}: {
-  ticket: TicketScanInfo;
-  onMarked?: () => void;
-}) {
-  const [isPending, startTransition] = useTransition();
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const isExpired = !ticket.usedAt && ticket.mealDate < todayStart;
-  const canMarkUsed =
-    ticket.paymentStatus === "PAGADO" &&
-    !ticket.usedAt &&
-    !isExpired;
-
-  function handleMarkUsed() {
-    startTransition(async () => {
-      await markTicketUsed(ticket.id);
-      onMarked?.();
-    });
-  }
+export function ScanResultPanel({ ticket }: { ticket: TicketScanInfo }) {
+  const todayStart = getTodayStartUTC();
+  const mealDate = ticket.mealDate instanceof Date ? ticket.mealDate : new Date(ticket.mealDate);
+  const isExpired = !ticket.usedAt && mealDate < todayStart;
 
   const mealDateStr = new Date(ticket.mealDate).toLocaleDateString("es-ES", {
     weekday: "short",
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   });
 
   return (
@@ -86,18 +67,6 @@ export function ScanResultPanel({
           </dd>
         </div>
       </dl>
-      {canMarkUsed && (
-        <div className="mt-4">
-          <Button
-            type="button"
-            className="w-full bg-green-600 text-white hover:bg-green-700"
-            disabled={isPending}
-            onClick={handleMarkUsed}
-          >
-            {isPending ? "..." : "Marcar canjeado"}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
