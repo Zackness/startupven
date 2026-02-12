@@ -99,6 +99,28 @@ export async function buyTicket(
   });
   if (!type) throw new Error("Tipo de ticket no disponible");
 
+  // Normalizar fecha (solo día) para coherencia con @db.Date
+  const mealDateNorm = new Date(mealDate);
+  mealDateNorm.setHours(0, 0, 0, 0);
+
+  // Regla de negocio: por la página de cliente SOLO se permite
+  // un ticket de COMEDOR por día. Si ya tiene uno, debe pedir
+  // al vendedor que registre manualmente otro.
+  if (type.lugar === "COMEDOR") {
+    const existingForDay = await db.ticket.findFirst({
+      where: {
+        userId: session.user.id,
+        mealDate: mealDateNorm,
+        ticketType: { lugar: "COMEDOR" },
+      },
+    });
+    if (existingForDay) {
+      throw new Error(
+        "Ya tienes un ticket de comedor para ese día. Si necesitas otra comida, pídele al vendedor que la registre manualmente."
+      );
+    }
+  }
+
   if (paymentMethod === "WALLET") {
     return await db.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { id: session.user.id } });
@@ -108,6 +130,21 @@ export async function buyTicket(
       const priceNum = Number(type.price);
       if (balanceNum < priceNum) {
         throw new Error("Saldo insuficiente");
+      }
+
+      if (type.lugar === "COMEDOR") {
+        const existingForDay = await tx.ticket.findFirst({
+          where: {
+            userId: session.user.id,
+            mealDate: mealDateNorm,
+            ticketType: { lugar: "COMEDOR" },
+          },
+        });
+        if (existingForDay) {
+          throw new Error(
+            "Ya tienes un ticket de comedor para ese día. Si necesitas otra comida, pídele al vendedor que la registre manualmente."
+          );
+        }
       }
 
       // Deduct balance
@@ -131,7 +168,7 @@ export async function buyTicket(
         data: {
           userId: session.user.id,
           ticketTypeId: type.id,
-          mealDate: new Date(mealDate),
+          mealDate: mealDateNorm,
           paymentStatus: "PAGADO", // Wallet payments are instant
           paymentMethod,
         },
@@ -144,7 +181,7 @@ export async function buyTicket(
     data: {
       userId: session.user.id,
       ticketTypeId: type.id,
-      mealDate: new Date(mealDate),
+      mealDate: mealDateNorm,
       paymentStatus: "PENDIENTE",
       paymentMethod,
       paymentReference,
