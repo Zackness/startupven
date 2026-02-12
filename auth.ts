@@ -20,6 +20,14 @@ function isBcryptHash(hash: string) {
 export const auth = betterAuth({
   plugins: [nextCookies()],
   database: prismaAdapter(db, { provider: "mysql" }),
+  // Sesiones más largas (sliding sessions): se renuevan mientras el usuario use la app.
+  // Unidades en segundos.
+  session: {
+    // 30 días
+    expiresIn: 60 * 60 * 24 * 30,
+    // Renovar expiración como mínimo cada 24h de uso
+    updateAge: 60 * 60 * 24,
+  },
   user: {
     changeEmail: {
       enabled: true,
