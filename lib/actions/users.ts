@@ -14,9 +14,26 @@ async function ensureAdmin() {
   if (user.role !== "ADMIN") redirect("/escritorio");
 }
 
-export async function getAdminUsers() {
+export async function getAdminUsers(search?: string | null) {
   await ensureAdmin();
+  const term = search?.trim();
+  const where = term
+    ? {
+        OR: [
+          { name: { contains: term } },
+          { email: { contains: term } },
+          { cedula: { contains: term } },
+          { expediente: { contains: term } },
+          { primerNombre: { contains: term } },
+          { segundoNombre: { contains: term } },
+          { primerApellido: { contains: term } },
+          { segundoApellido: { contains: term } },
+        ],
+      }
+    : undefined;
+
   const users = await db.user.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     select: {
       id: true,

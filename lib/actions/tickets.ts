@@ -361,8 +361,11 @@ export async function createManualSale(input: {
   mealDateYmd: string;
   quantity: number;
   markUsed?: boolean;
+  paymentReference?: string;
+  paymentBank?: string;
 }) {
-  await ensureVendorOrAdmin();
+  const session = await ensureVendorOrAdmin();
+  const current = session.user as unknown as { id: string };
 
   const quantity = Number.isFinite(input.quantity) ? Math.floor(input.quantity) : 1;
   if (quantity < 1 || quantity > 50) throw new Error("La cantidad debe estar entre 1 y 50");
@@ -383,6 +386,9 @@ export async function createManualSale(input: {
   const now = new Date();
   const usedAt = input.markUsed ? now : null;
 
+  const paymentReference = input.paymentReference?.trim() || null;
+  const paymentBank = input.paymentBank?.trim() || null;
+
   await db.ticket.createMany({
     data: Array.from({ length: quantity }).map(() => ({
       userId: input.userId,
@@ -390,6 +396,9 @@ export async function createManualSale(input: {
       mealDate,
       usedAt,
       paymentStatus: "PAGADO",
+      sellerId: current.id,
+      paymentReference,
+      paymentBank,
     })),
   });
 
@@ -459,6 +468,66 @@ export async function getAdminTicketsFiltered(
       paymentReference: t.paymentReference,
       paymentBank: t.paymentBank,
       createdAt: t.createdAt,
+    })),
+    total,
+  };
+}
+
+export async function getVendorTicketsFiltered(
+  page = 0,
+  pageSize = 20,
+  filters?: {
+    fecha?: string | null;
+    cedula?: string | null;
+    expediente?: string | null;
+  }
+) {
+  const session = await ensureVendorOrAdmin();
+  const current = session.user as unknown as { id: string };
+
+  const where: Prisma.TicketWhereInput = {
+    sellerId: current.id,
+  };
+
+  if (filters?.fecha) {
+    const day = parseLocalYmd(filters.fecha);
+    if (day) {
+      const next = new Date(day);
+      next.setDate(day.getDate() + 1);
+      where.mealDate = { gte: day, lt: next };
+    }
+  }
+
+  if (filters && (filters.cedula || filters.expediente)) {
+    const userWhere: Prisma.UserWhereInput = {};
+    if (filters.cedula) {
+      userWhere.cedula = { contains: filters.cedula.trim() };
+    }
+    if (filters.expediente) {
+      userWhere.expediente = { contains: filters.expediente.trim() };
+    }
+    where.user = userWhere;
+  }
+
+  const [tickets, total] = await Promise.all([
+    db.ticket.findMany({
+      where,
+      include: { user: { select: { name: true, email: true } }, ticketType: true },
+      orderBy: { createdAt: "desc" },
+      skip: page * pageSize,
+      take: pageSize,
+    }),
+    db.ticket.count({ where }),
+  ]);
+
+  return {
+    tickets: tickets.map((t) => ({
+      id: t.id,
+      userName: t.user.name,
+      userEmail: t.user.email,
+      ticketTypeName: t.ticketType.name,
+      mealDate: t.mealDate,
+      usedAt: t.usedAt,
     })),
     total,
   };

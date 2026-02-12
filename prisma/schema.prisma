@@ -49,10 +49,11 @@ model User {
   segundoApellido  String?
   accounts         Account[]
   sessions         Session[]
-  tickets          Ticket[]
-  wallet        WalletTransaction[]
-  paymentReports PaymentReport[]
-  balance       Decimal   @default(0) @db.Decimal(10, 2)
+  tickets          Ticket[]           @relation("TicketBuyer")
+  ticketsSold      Ticket[]           @relation("TicketSeller")
+  wallet           WalletTransaction[]
+  paymentReports   PaymentReport[]
+  balance          Decimal   @default(0) @db.Decimal(10, 2)
 }
 
 // Lugar de la comida: cantina o comedor
@@ -98,13 +99,16 @@ model Ticket {
   usedAt        DateTime?
   paymentStatus TicketPaymentStatus @default(PENDIENTE)
   createdAt     DateTime            @default(now())
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  user          User       @relation("TicketBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  ticketType    TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
   paymentMethod    String              @default("PAGO_MOVIL") // "PAGO_MOVIL" | "STRIPE"
   paymentReference String?
   paymentBank      String?
+  sellerId         String?
+  seller           User?      @relation("TicketSeller", fields: [sellerId], references: [id], onDelete: SetNull)
   @@index([userId])
   @@index([mealDate])
+  @@index([sellerId])
 }
 
 model WalletTransaction {

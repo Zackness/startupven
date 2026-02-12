@@ -49,6 +49,8 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
     return `${y}-${m}-${day}`;
   });
   const [quantity, setQuantity] = React.useState<number>(1);
+  const [paymentBank, setPaymentBank] = React.useState<string>("");
+  const [paymentReference, setPaymentReference] = React.useState<string>("");
 
   const selectedUser = React.useMemo(() => props.users.find((u) => u.id === userId), [props.users, userId]);
 
@@ -59,14 +61,21 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
 
     startTransition(async () => {
       try {
+        const bank = paymentBank.trim() || undefined;
+        const reference = paymentReference.trim() || undefined;
+
         await createManualSale({
           userId,
           ticketTypeId,
           mealDateYmd: mealDate,
           quantity,
+          paymentBank: bank,
+          paymentReference: reference,
         });
         setSuccess("Venta registrada.");
         setQuantity(1);
+        setPaymentBank("");
+        setPaymentReference("");
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "No se pudo registrar la venta");
@@ -100,7 +109,10 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <PopoverContent
+                className="w-[--radix-popover-trigger-width] p-0 bg-white shadow-md border border-zinc-200"
+                align="start"
+              >
                 <Command>
                   <CommandInput placeholder="Buscar por nombre, email, cédula o expediente..." />
                   <CommandList>
@@ -166,6 +178,29 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
               disabled={isPending}
             />
             <p className="text-xs text-zinc-500">Máximo 50 por operación.</p>
+          </div>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black">Banco (opcional)</label>
+            <Input
+              type="text"
+              value={paymentBank}
+              onChange={(e) => setPaymentBank(e.target.value)}
+              placeholder="Ej. Banesco"
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black">Referencia (opcional)</label>
+            <Input
+              type="text"
+              value={paymentReference}
+              onChange={(e) => setPaymentReference(e.target.value)}
+              placeholder="Ej. 1234"
+              disabled={isPending}
+            />
           </div>
         </div>
 

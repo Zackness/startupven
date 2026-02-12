@@ -1,4 +1,4 @@
-import { getAdminTicketTypes, getAdminTicketsFiltered } from "@/lib/actions/tickets";
+import { getVendorTicketsFiltered } from "@/lib/actions/tickets";
 import { getTodayStartUTC } from "@/lib/utils";
 
 function formatDate(d: Date) {
@@ -25,12 +25,11 @@ export default async function VendedorTicketsPage({
   const defaultYmd = new Date().toISOString().slice(0, 10);
   const fechaYmd = fecha ?? defaultYmd;
 
-  const [types, ticketsResult] = await Promise.all([
-    getAdminTicketTypes(), // mismo catálogo; la autorización se valida por layout/middleware
-    getAdminTicketsFiltered(pageNum, pageSize, { fecha: fechaYmd, cedula, expediente }),
-  ]);
-
-  const { tickets, total } = ticketsResult;
+  const { tickets, total } = await getVendorTicketsFiltered(pageNum, pageSize, {
+    fecha: fechaYmd,
+    cedula,
+    expediente,
+  });
   const totalPages = Math.ceil(total / pageSize);
 
   function pageHref(nextPage: number) {

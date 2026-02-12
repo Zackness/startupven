@@ -37,8 +37,13 @@ function fullName(u: {
   return u.name || "—";
 }
 
-export default async function AdminUsuariosPage() {
-  const users = await getAdminUsers();
+export default async function AdminUsuariosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const users = await getAdminUsers(q ?? null);
 
   return (
     <div className="space-y-8">
@@ -52,6 +57,33 @@ export default async function AdminUsuariosPage() {
       </div>
 
       <CreateUserForm />
+
+      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <form action={`${ADMIN_PATH}/usuarios`} method="GET" className="flex gap-2">
+          <label htmlFor="usuarios-search" className="sr-only">
+            Buscar usuario
+          </label>
+          <input
+            id="usuarios-search"
+            type="search"
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="Buscar por nombre, email, cédula o expediente..."
+            className="flex h-10 flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+          />
+          <Button type="submit" variant="secondary" className="shrink-0">
+            Buscar
+          </Button>
+          {q && (
+            <Link
+              href={`${ADMIN_PATH}/usuarios`}
+              className="flex h-10 items-center rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            >
+              Limpiar
+            </Link>
+          )}
+        </form>
+      </div>
 
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
