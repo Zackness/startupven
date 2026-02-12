@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { updateUser } from "@/lib/actions/users";
+import { updateUser, setUserPasswordAsAdmin } from "@/lib/actions/users";
 import { ADMIN_PATH } from "@/routes";
 import { USER_ROLES, USER_GREMIOS } from "@/routes";
 import { FormError } from "@/components/form-error";
@@ -31,6 +31,9 @@ export function EditUserForm({ user }: { user: User }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [passwordError, setPasswordError] = useState<string | undefined>("");
+  const [passwordSuccess, setPasswordSuccess] = useState<string | undefined>("");
+  const [passwordPending, setPasswordPending] = useState(false);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -73,7 +76,37 @@ export function EditUserForm({ user }: { user: User }) {
     });
   }
 
+  function handlePasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+    const form = e.currentTarget;
+    const newPassword = (form.elements.namedItem("newPassword") as HTMLInputElement)?.value ?? "";
+    const confirm = (form.elements.namedItem("confirmPassword") as HTMLInputElement)?.value ?? "";
+    if (newPassword.length < 6) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== confirm) {
+      setPasswordError("Las contraseñas no coinciden.");
+      return;
+    }
+    setPasswordPending(true);
+    setUserPasswordAsAdmin(user.id, newPassword)
+      .then(() => {
+        setPasswordSuccess("Contraseña actualizada. El usuario ya puede iniciar sesión con la nueva contraseña.");
+        form.reset();
+      })
+      .catch((err) => {
+        setPasswordError(err instanceof Error ? err.message : "Error al actualizar la contraseña.");
+      })
+      .finally(() => {
+        setPasswordPending(false);
+      });
+  }
+
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
@@ -230,5 +263,58 @@ export function EditUserForm({ user }: { user: User }) {
         </Button>
       </div>
     </form>
+
+    <div className="mt-8 border-t border-zinc-200 pt-6">
+      <h3 className="mb-2 text-base font-semibold text-black">Cambiar contraseña</h3>
+      <p className="mb-4 text-sm text-zinc-600">
+        Si el usuario olvidó su contraseña, puedes establecer una nueva. No necesitas la contraseña actual.
+      </p>
+      <form onSubmit={handlePasswordSubmit} className="flex flex-wrap items-end gap-4">
+        <div className="space-y-2">
+          <label htmlFor="newPassword" className="text-sm font-medium text-black">
+            Nueva contraseña
+          </label>
+          <Input
+            id="newPassword"
+            name="newPassword"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Mínimo 6 caracteres"
+            minLength={6}
+            disabled={passwordPending}
+            className="w-56"
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="confirmPassword" className="text-sm font-medium text-black">
+            Confirmar contraseña
+          </label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Repetir contraseña"
+            disabled={passwordPending}
+            className="w-56"
+          />
+        </div>
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={passwordPending}
+          className="border-zinc-300"
+        >
+          {passwordPending ? "Guardando…" : "Establecer nueva contraseña"}
+        </Button>
+      </form>
+      {passwordError && (
+        <p className="mt-2 text-sm text-red-600">{passwordError}</p>
+      )}
+      {passwordSuccess && (
+        <p className="mt-2 text-sm text-green-700">{passwordSuccess}</p>
+      )}
+    </div>
+  </>
   );
 }

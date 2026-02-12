@@ -47,6 +47,7 @@ export default async function AdminEditPlatoPage({
             id: plato.id,
             name: plato.name,
             category: plato.category,
+            lugar: plato.lugar,
             price: Number(plato.price),
             description: plato.description,
             image: plato.image,

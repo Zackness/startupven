@@ -1,7 +1,13 @@
 import { betterAuth } from "better-auth";
+import { verifyPassword as authVerifyPassword } from "better-auth/crypto";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+
+function isBcryptHash(hash: string) {
+  return hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$");
+}
 
 /**
  * Better Auth (reemplazo de Auth.js/NextAuth).
@@ -65,6 +71,14 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    // Bcrypt: admin y createAdminUser. Scrypt: usuarios creados con el flujo normal de Better Auth.
+    password: {
+      hash: async (password) => bcrypt.hash(password, 10),
+      verify: async ({ hash, password }) => {
+        if (isBcryptHash(hash)) return bcrypt.compare(password, hash);
+        return authVerifyPassword({ hash, password });
+      },
+    },
   },
 });
 

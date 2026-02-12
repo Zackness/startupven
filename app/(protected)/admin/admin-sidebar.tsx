@@ -2,21 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Ticket, UtensilsCrossed, Users } from "lucide-react";
+import { Home, LayoutDashboard, QrCode, Ticket, UtensilsCrossed, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ADMIN_PATH, ESCRITORIO_PATH } from "@/routes";
+import { ADMIN_PATH, EDITOR_PATH, ESCRITORIO_PATH } from "@/routes";
 import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
-const items = [
+const adminItems = [
   { href: ADMIN_PATH, label: "Panel", icon: LayoutDashboard },
   { href: `${ADMIN_PATH}/tickets`, label: "Tickets", icon: Ticket },
+  { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
   { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
   { href: `${ADMIN_PATH}/usuarios`, label: "Usuarios", icon: Users },
   { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },
 ] as const;
 
-export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
+const editorItems = [
+  { href: EDITOR_PATH, label: "Panel editor", icon: LayoutDashboard },
+  { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
+  { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
+  { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },
+] as const;
+
+export function AdminSidebar({
+  onNavigate,
+  isEditor = false,
+}: { onNavigate?: () => void; isEditor?: boolean }) {
   const pathname = usePathname();
+  const items = isEditor ? editorItems : adminItems;
 
   return (
     <nav className="flex flex-col gap-1">

@@ -115,7 +115,7 @@ export function BuyTicketForm({ types, preSelectedId, onSuccess, balance = 0 }: 
             <option value="">Selecciona...</option>
             {types.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.name} — ${t.price.toFixed(2)}
+                {t.name} — Bs. {t.price.toFixed(2)}
                 {t.availableForDate && ` (${new Date(t.availableForDate).toLocaleDateString()})`}
               </option>
             ))}

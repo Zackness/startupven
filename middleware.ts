@@ -89,6 +89,18 @@ export default async function middleware(req: NextRequest) {
       const callbackUrl = encodeURIComponent(nextUrl.pathname + nextUrl.search);
       return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl));
     }
+    if (role === "EDITOR") {
+      const path = nextUrl.pathname;
+      const editorAllowed =
+        path === adminRoutesPrefix ||
+        path === adminRoutesPrefix + "/" ||
+        path.startsWith(adminRoutesPrefix + "/almuerzos") ||
+        path.startsWith(adminRoutesPrefix + "/escaneo");
+      if (!editorAllowed) {
+        return NextResponse.redirect(new URL(ESCRITORIO_PATH, nextUrl));
+      }
+      return;
+    }
     if (role !== "ADMIN") {
       return NextResponse.redirect(new URL(ESCRITORIO_PATH, nextUrl));
     }

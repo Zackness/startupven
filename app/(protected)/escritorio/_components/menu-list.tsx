@@ -3,6 +3,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TicketCategory } from "@/lib/generated/prisma/enums";
 
+const CategoryLabels: Record<string, string> = {
+  ALMUERZO: "Almuerzo",
+  DESAYUNO: "Desayuno",
+  CENA: "Cena",
+};
+
+const LugarLabels: Record<string, string> = {
+  COMEDOR: "Comedor",
+  CANTINA: "Cantina",
+};
+
 interface MenuListProps {
     types: TicketTypeOption[];
     selectedTypeId: string;
@@ -43,13 +54,16 @@ export function MenuList({ types, selectedTypeId, onSelect }: MenuListProps) {
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
                                     <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider", CategoryColors[type.category as TicketCategory] || "bg-gray-100 text-gray-800")}>
-                                        {type.category}
+                                        {CategoryLabels[type.category] ?? type.category}
                                     </span>
-                                    {isDateSpecific && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold text-sky-800 bg-sky-100">
+                                        {LugarLabels[type.lugar] ?? type.lugar}
+                                    </span>
+                                    {isDateSpecific && type.availableForDate && (
                                         <span className="text-xs text-zinc-500">
-                                            📅 {new Date(type.availableForDate!).toLocaleDateString()}
+                                            📅 {new Date(type.availableForDate).toLocaleDateString("es-VE", { day: "numeric", month: "short" })}
                                         </span>
                                     )}
                                 </div>
@@ -59,7 +73,7 @@ export function MenuList({ types, selectedTypeId, onSelect }: MenuListProps) {
 
                             {/* Price & Action */}
                             <div className="text-right">
-                                <p className="font-bold text-black mb-2">${type.price.toFixed(2)}</p>
+                                <p className="font-bold text-black mb-2">Bs. {type.price.toFixed(2)}</p>
                                 <Button
                                     size="sm"
                                     variant={selected ? "default" : "outline"}

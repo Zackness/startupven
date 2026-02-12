@@ -10,6 +10,7 @@ type Plato = {
   id: string;
   name: string;
   category: string;
+  lugar: string;
   price: number;
   description: string | null;
   image: string | null;
@@ -21,14 +22,17 @@ export function EditTicketTypeForm({ plato }: { plato: Plato }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [imageUrl, setImageUrl] = useState(plato.image ?? "");
-  const [isSpecificDate, setIsSpecificDate] = useState(!!plato.availableForDate);
+  const [lugar, setLugar] = useState<"COMEDOR" | "CANTINA">(
+    (plato.lugar === "CANTINA" ? "CANTINA" : "COMEDOR") as "COMEDOR" | "CANTINA"
+  );
 
   const defaultDate = plato.availableForDate
     ? new Date(plato.availableForDate).toISOString().slice(0, 10)
     : "";
 
   async function handleSubmit(formData: FormData) {
-    if (!isSpecificDate) {
+    const lugarValue = (formData.get("lugar") as string) || "COMEDOR";
+    if (lugarValue === "CANTINA") {
       formData.delete("availableForDate");
     }
 
@@ -85,8 +89,24 @@ export function EditTicketTypeForm({ plato }: { plato: Plato }) {
           </select>
         </div>
         <div className="space-y-2">
+          <label htmlFor="lugar" className="block text-sm font-medium text-black">
+            Lugar
+          </label>
+          <select
+            id="lugar"
+            name="lugar"
+            required
+            value={lugar}
+            onChange={(e) => setLugar(e.target.value as "COMEDOR" | "CANTINA")}
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black"
+          >
+            <option value="COMEDOR">Comedor</option>
+            <option value="CANTINA">Cantina</option>
+          </select>
+        </div>
+        <div className="space-y-2">
           <label htmlFor="price" className="block text-sm font-medium text-black">
-            Precio
+            Precio (Bs.)
           </label>
           <input
             id="price"
@@ -130,35 +150,21 @@ export function EditTicketTypeForm({ plato }: { plato: Plato }) {
         </div>
       </div>
 
-      <div className="space-y-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="specific-date-check"
-            checked={isSpecificDate}
-            onChange={(e) => setIsSpecificDate(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
-          />
-          <label htmlFor="specific-date-check" className="cursor-pointer text-sm font-medium text-black">
-            Es para una fecha específica
+      {lugar === "COMEDOR" && (
+        <div className="space-y-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+          <label htmlFor="availableForDate" className="block text-sm font-medium text-black">
+            Fecha del menú (obligatoria para comedor)
           </label>
+          <input
+            id="availableForDate"
+            name="availableForDate"
+            type="date"
+            required={lugar === "COMEDOR"}
+            defaultValue={defaultDate}
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black sm:w-auto"
+          />
         </div>
-        {isSpecificDate && (
-          <div className="space-y-2 pl-6">
-            <label htmlFor="availableForDate" className="block text-sm font-medium text-black">
-              Fecha del evento/comida
-            </label>
-            <input
-              id="availableForDate"
-              name="availableForDate"
-              type="date"
-              required={isSpecificDate}
-              defaultValue={defaultDate}
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black sm:w-auto"
-            />
-          </div>
-        )}
-      </div>
+      )}
 
       <Button type="submit" disabled={isPending} className="bg-blue-800 text-white hover:bg-blue-600">
         {isPending ? "Guardando…" : "Guardar cambios"}

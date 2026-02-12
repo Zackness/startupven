@@ -2,20 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingCart, Ticket, UserCircle } from "lucide-react";
+import { Home, LayoutDashboard, ShoppingCart, Ticket, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ESCRITORIO_PATH } from "@/routes";
+import { ADMIN_PATH, ESCRITORIO_PATH, EDITOR_PATH, VENDEDOR_PATH } from "@/routes";
 import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
-const items = [
+const baseItems = [
   { href: ESCRITORIO_PATH, label: "Inicio", icon: Home },
   { href: `${ESCRITORIO_PATH}/billetera`, label: "Billetera", icon: ShoppingCart },
   { href: `${ESCRITORIO_PATH}/mis-tickets`, label: "Mis tickets", icon: Ticket },
   { href: `${ESCRITORIO_PATH}/cuenta`, label: "Mi cuenta", icon: UserCircle },
 ] as const;
 
-export function EscritorioSidebar({ onNavigate }: { onNavigate?: () => void }) {
+const panelByRole: Record<string, { href: string; label: string; icon: typeof LayoutDashboard }> = {
+  ADMIN: { href: ADMIN_PATH, label: "Panel admin", icon: LayoutDashboard },
+  EDITOR: { href: EDITOR_PATH, label: "Panel editor", icon: LayoutDashboard },
+  VENDEDOR: { href: VENDEDOR_PATH, label: "Panel vendedor", icon: LayoutDashboard },
+};
+
+export function EscritorioSidebar({
+  role,
+  onNavigate,
+}: { role?: string | null; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const panelItem = role ? panelByRole[role] : null;
+  const items = panelItem
+    ? [...baseItems, panelItem]
+    : baseItems;
 
   return (
     <nav className="flex flex-col gap-1">

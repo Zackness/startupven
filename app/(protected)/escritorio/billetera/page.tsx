@@ -53,8 +53,7 @@ export default async function WalletPage() {
                                         className={`font-bold ${tx.amount > 0 ? "text-green-600" : "text-black"
                                             }`}
                                     >
-                                        {tx.amount > 0 ? "+" : ""}
-                                        {tx.amount.toFixed(2)}
+                                        {tx.amount > 0 ? "+" : ""}Bs. {tx.amount.toFixed(2)}
                                     </span>
                                 </div>
                             ))

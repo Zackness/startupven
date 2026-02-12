@@ -120,7 +120,7 @@ export function MenuContainer({ types, balance }: MenuContainerProps) {
 
                             <div>
                                 <h3 className="text-lg font-bold text-black">{selectedTicket.name}</h3>
-                                <p className="text-xl font-medium text-black">${selectedTicket.price.toFixed(2)}</p>
+                                <p className="text-xl font-medium text-black">Bs. {selectedTicket.price.toFixed(2)}</p>
                                 {selectedTicket.description && <p className="mt-2 text-zinc-600">{selectedTicket.description}</p>}
                             </div>
 

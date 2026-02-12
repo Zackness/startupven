@@ -16,6 +16,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
+const DEBOUNCE_MS = 450;
+
 export type TicketFilterUser = {
   id: string;
   label: string;
@@ -42,8 +44,16 @@ export function TicketFilters(props: {
   const tipo = searchParams.get("tipo") ?? props.initial.tipo ?? "";
   const usuario = searchParams.get("usuario") ?? props.initial.usuario ?? "";
   const fecha = searchParams.get("fecha") ?? props.initial.fecha ?? "";
-  const cedula = searchParams.get("cedula") ?? props.initial.cedula ?? "";
-  const expediente = searchParams.get("expediente") ?? props.initial.expediente ?? "";
+
+  const initialCedula = searchParams.get("cedula") ?? props.initial.cedula ?? "";
+  const initialExpediente = searchParams.get("expediente") ?? props.initial.expediente ?? "";
+  const [cedula, setCedula] = React.useState(initialCedula);
+  const [expediente, setExpediente] = React.useState(initialExpediente);
+
+  React.useEffect(() => {
+    setCedula(initialCedula);
+    setExpediente(initialExpediente);
+  }, [initialCedula, initialExpediente]);
 
   const selectedUser = React.useMemo(
     () => (usuario ? users.find((u) => u.id === usuario) : undefined),
@@ -65,6 +75,8 @@ export function TicketFilters(props: {
   }
 
   function clearFilters() {
+    setCedula("");
+    setExpediente("");
     const next = new URLSearchParams(searchParams.toString());
     next.delete("tipo");
     next.delete("usuario");
@@ -75,6 +87,47 @@ export function TicketFilters(props: {
     const qs = next.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname);
   }
+
+  const cedulaRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const expedienteRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const applyCedula = React.useCallback(
+    (value: string) => {
+      const next = new URLSearchParams(searchParams.toString());
+      if (value) next.set("cedula", value);
+      else next.delete("cedula");
+      next.set("page", "0");
+      const qs = next.toString();
+      router.push(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname, router, searchParams]
+  );
+
+  const applyExpediente = React.useCallback(
+    (value: string) => {
+      const next = new URLSearchParams(searchParams.toString());
+      if (value) next.set("expediente", value);
+      else next.delete("expediente");
+      next.set("page", "0");
+      const qs = next.toString();
+      router.push(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname, router, searchParams]
+  );
+
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCedula(value);
+    if (cedulaRef.current) clearTimeout(cedulaRef.current);
+    cedulaRef.current = setTimeout(() => applyCedula(value), DEBOUNCE_MS);
+  };
+
+  const handleExpedienteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setExpediente(value);
+    if (expedienteRef.current) clearTimeout(expedienteRef.current);
+    expedienteRef.current = setTimeout(() => applyExpediente(value), DEBOUNCE_MS);
+  };
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-4">
@@ -163,7 +216,7 @@ export function TicketFilters(props: {
           <label className="text-sm font-medium text-black">Cédula</label>
           <Input
             value={cedula}
-            onChange={(e) => setOrClearParam("cedula", e.target.value)}
+            onChange={handleCedulaChange}
             placeholder="Ej. V-12345678"
           />
         </div>
@@ -172,7 +225,7 @@ export function TicketFilters(props: {
           <label className="text-sm font-medium text-black">Expediente</label>
           <Input
             value={expediente}
-            onChange={(e) => setOrClearParam("expediente", e.target.value)}
+            onChange={handleExpedienteChange}
             placeholder="Ej. 2024-12345"
           />
         </div>

@@ -135,3 +135,42 @@ export async function createAdminUser(data: {
   revalidatePath("/admin");
   return { id: user.id, email: user.email };
 }
+
+/** Permite al admin establecer una nueva contraseña para cualquier usuario (p. ej. si olvidó la suya). */
+export async function setUserPasswordAsAdmin(userId: string, newPassword: string) {
+  await ensureAdmin();
+
+  const trimmed = newPassword?.trim() ?? "";
+  if (trimmed.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres");
+
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true },
+  });
+  if (!user) throw new Error("Usuario no encontrado");
+
+  const passwordHash = await bcrypt.hash(trimmed, 10);
+
+  const account = await db.account.findFirst({
+    where: { userId, providerId: "credential" },
+  });
+
+  if (account) {
+    await db.account.update({
+      where: { id: account.id },
+      data: { password: passwordHash },
+    });
+  } else {
+    await db.account.create({
+      data: {
+        userId: user.id,
+        providerId: "credential",
+        accountId: user.id,
+        password: passwordHash,
+      },
+    });
+  }
+
+  revalidatePath("/admin/usuarios");
+  revalidatePath(`/admin/usuarios/${userId}`);
+}

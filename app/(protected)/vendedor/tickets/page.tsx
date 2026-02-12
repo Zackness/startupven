@@ -1,5 +1,4 @@
 import { getAdminTicketTypes, getAdminTicketsFiltered } from "@/lib/actions/tickets";
-import { MarkUsedButton } from "./mark-used-button";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -47,7 +46,7 @@ export default async function VendedorTicketsPage({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-black">Tickets (vendedor)</h1>
-        <p className="mt-1 text-zinc-600">Consulta y canjea tickets. Los vencidos quedan como “Cancelado”.</p>
+        <p className="mt-1 text-zinc-600">Consulta tickets vendidos. El canje lo realiza personal autorizado (admin/editor).</p>
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-4">
@@ -141,7 +140,7 @@ export default async function VendedorTicketsPage({
                     </td>
                     <td className="px-4 py-3">
                       {!t.usedAt && !isCancelled ? (
-                        <MarkUsedButton ticketId={t.id} />
+                        <span className="text-xs text-zinc-500">Comprado</span>
                       ) : isCancelled ? (
                         <span className="text-xs text-zinc-500">Vencido</span>
                       ) : null}

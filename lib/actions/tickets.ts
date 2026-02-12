@@ -7,7 +7,21 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+/** Desactiva platos con fecha específica ya pasada */
+async function deactivateExpiredTicketTypes() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  await db.ticketType.updateMany({
+    where: {
+      availableForDate: { lt: today },
+      active: true,
+    },
+    data: { active: false },
+  });
+}
+
 export async function getTicketTypes() {
+  await deactivateExpiredTicketTypes();
   const types = await db.ticketType.findMany({
     where: { active: true },
     orderBy: { name: "asc" },
@@ -16,6 +30,7 @@ export async function getTicketTypes() {
     id: t.id,
     name: t.name,
     category: t.category,
+    lugar: t.lugar,
     price: Number(t.price),
     description: t.description,
     image: t.image,
@@ -445,6 +460,57 @@ export async function getAdminTicketsFiltered(
   };
 }
 
+export async function getEditorTicketsFiltered(
+  page = 0,
+  pageSize = 20,
+  filters?: { cedula?: string | null; fecha?: string | null }
+) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const user = session.user as unknown as { role?: string };
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
+
+  const where: Prisma.TicketWhereInput = {};
+  if (filters?.fecha) {
+    const day = parseLocalYmd(filters.fecha);
+    if (day) {
+      const next = new Date(day);
+      next.setDate(day.getDate() + 1);
+      where.mealDate = { gte: day, lt: next };
+    }
+  }
+  if (filters?.cedula?.trim()) {
+    where.user = { cedula: { contains: filters.cedula.trim() } };
+  }
+
+  const [tickets, total] = await Promise.all([
+    db.ticket.findMany({
+      where,
+      include: { user: { select: { name: true, email: true } }, ticketType: true },
+      orderBy: { createdAt: "desc" },
+      skip: page * pageSize,
+      take: pageSize,
+    }),
+    db.ticket.count({ where }),
+  ]);
+
+  return {
+    tickets: tickets.map((t) => ({
+      id: t.id,
+      userName: t.user.name,
+      userEmail: t.user.email,
+      ticketTypeName: t.ticketType.name,
+      mealDate: t.mealDate,
+      usedAt: t.usedAt,
+      paymentStatus: t.paymentStatus,
+      paymentReference: t.paymentReference,
+      paymentBank: t.paymentBank,
+      createdAt: t.createdAt,
+    })),
+    total,
+  };
+}
+
 export async function getAdminUsersForTicketsFilter() {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -482,8 +548,9 @@ export async function getAdminTicketTypes(): Promise<Prisma.TicketTypeGetPayload
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN") redirect("/escritorio");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
 
+  await deactivateExpiredTicketTypes();
   return db.ticketType.findMany({
     orderBy: { name: "asc" },
   });
@@ -493,10 +560,11 @@ export async function createTicketType(formData: FormData) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN") redirect("/escritorio");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
 
   const name = formData.get("name") as string;
-  const category = (formData.get("category") as any) || "ALMUERZO";
+  const category = (formData.get("category") as "DESAYUNO" | "ALMUERZO" | "CENA") || "ALMUERZO";
+  const lugar = (formData.get("lugar") as "CANTINA" | "COMEDOR") || "COMEDOR";
   const price = formData.get("price") as string;
   const description = (formData.get("description") as string) || null;
   const image = (formData.get("image") as string) || null;
@@ -518,7 +586,8 @@ export async function createTicketType(formData: FormData) {
   await db.ticketType.create({
     data: {
       name: name.trim(),
-      category: category,
+      category,
+      lugar,
       price: parseFloat(price),
       description: description?.trim() || null,
       image,
@@ -533,13 +602,14 @@ export async function updateTicketType(id: string, formData: FormData) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN") redirect("/escritorio");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
 
   const existing = await db.ticketType.findUnique({ where: { id } });
   if (!existing) throw new Error("Plato no encontrado");
 
   const name = (formData.get("name") as string)?.trim();
   const category = (formData.get("category") as "DESAYUNO" | "ALMUERZO" | "CENA") || existing.category;
+  const lugar = (formData.get("lugar") as "CANTINA" | "COMEDOR") ?? existing.lugar;
   const priceStr = formData.get("price") as string;
   const description = (formData.get("description") as string)?.trim() || null;
   const image = (formData.get("image") as string) || null;
@@ -564,6 +634,7 @@ export async function updateTicketType(id: string, formData: FormData) {
     data: {
       name,
       category,
+      lugar,
       price,
       description,
       image,
@@ -579,7 +650,7 @@ export async function toggleTicketTypeActive(id: string) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN") redirect("/escritorio");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
 
   const type = await db.ticketType.findUnique({ where: { id } });
   if (!type) throw new Error("Tipo no encontrado");
@@ -592,11 +663,41 @@ export async function toggleTicketTypeActive(id: string) {
   revalidatePath("/admin/almuerzos");
 }
 
+/** Para el lector QR: devuelve datos del ticket (solo ADMIN/EDITOR). */
+export async function getTicketByIdForScan(ticketId: string) {
+  const session = await auth();
+  if (!session?.user) return null;
+  const user = session.user as unknown as { role?: string };
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") return null;
+
+  const ticket = await db.ticket.findUnique({
+    where: { id: ticketId },
+    select: {
+      id: true,
+      mealDate: true,
+      usedAt: true,
+      paymentStatus: true,
+      user: { select: { name: true, email: true } },
+      ticketType: { select: { name: true } },
+    },
+  });
+  if (!ticket) return null;
+  return {
+    id: ticket.id,
+    userName: ticket.user.name,
+    userEmail: ticket.user.email,
+    ticketTypeName: ticket.ticketType.name,
+    mealDate: ticket.mealDate,
+    usedAt: ticket.usedAt,
+    paymentStatus: ticket.paymentStatus,
+  };
+}
+
 export async function markTicketUsed(ticketId: string) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN" && user.role !== "VENDEDOR") redirect("/escritorio");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
 
   const ticket = await db.ticket.findUnique({
     where: { id: ticketId },
@@ -617,19 +718,21 @@ export async function markTicketUsed(ticketId: string) {
     data: { usedAt: new Date() },
   });
   revalidatePath("/admin/tickets");
+  revalidatePath("/editor");
 }
 
 export async function approveTicket(ticketId: string) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN") redirect("/escritorio");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") redirect("/escritorio");
 
   await db.ticket.update({
     where: { id: ticketId },
     data: { paymentStatus: "PAGADO" },
   });
   revalidatePath("/admin/tickets");
+  revalidatePath("/editor");
 }
 
 export async function processExpiredTickets() {

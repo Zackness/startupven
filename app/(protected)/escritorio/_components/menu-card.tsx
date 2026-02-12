@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TicketCategory } from "@/lib/generated/prisma/enums";
 
+const CategoryLabels: Record<string, string> = {
+  ALMUERZO: "Almuerzo",
+  DESAYUNO: "Desayuno",
+  CENA: "Cena",
+};
+
+const LugarLabels: Record<string, string> = {
+  COMEDOR: "Comedor",
+  CANTINA: "Cantina",
+};
+
 interface MenuCardProps {
     type: TicketTypeOption;
     selected: boolean;
@@ -49,20 +60,23 @@ export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
                     </div>
                 )}
 
-                {/* Category Badge */}
-                <div className="absolute left-3 top-3">
+                {/* Category + Lugar Badges */}
+                <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
                     <span
                         className={cn(
                             "rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm border",
                             CategoryColors[type.category as TicketCategory] || "bg-zinc-100 text-zinc-800 border-zinc-200"
                         )}
                     >
-                        {type.category}
+                        {CategoryLabels[type.category] ?? type.category}
+                    </span>
+                    <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800 border border-sky-200 shadow-sm">
+                        {LugarLabels[type.lugar] ?? type.lugar}
                     </span>
                 </div>
 
                 {/* Date Badge */}
-                {isDateSpecific && (
+                {isDateSpecific && dateStr && (
                     <div className="absolute right-3 top-3">
                         <span className="rounded-full bg-black/70 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
                             📅 {dateStr}
@@ -78,7 +92,7 @@ export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
                         {type.name}
                     </h3>
                     <span className="font-medium text-black">
-                        ${type.price.toFixed(2)}
+                        Bs. {type.price.toFixed(2)}
                     </span>
                 </div>
 

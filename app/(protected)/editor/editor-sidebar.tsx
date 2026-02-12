@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard } from "lucide-react";
+import { Home, LayoutDashboard, QrCode, UtensilsCrossed } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EDITOR_PATH, ESCRITORIO_PATH } from "@/routes";
+import { ADMIN_PATH, EDITOR_PATH, ESCRITORIO_PATH } from "@/routes";
 import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
 const items = [
   { href: EDITOR_PATH, label: "Panel", icon: LayoutDashboard },
+  { href: `${EDITOR_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
+  { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
   { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },
 ] as const;
 

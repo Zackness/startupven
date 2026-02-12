@@ -18,7 +18,7 @@ export function WalletCard({ balance }: WalletCardProps) {
                 <Wallet className="h-4 w-4 text-indigo-100" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{balance.toFixed(2)} Ref.</div>
+                <div className="text-2xl font-bold">Bs. {balance.toFixed(2)}</div>
                 <p className="text-xs text-indigo-100 mt-1">
                     Saldo disponible para compras
                 </p>

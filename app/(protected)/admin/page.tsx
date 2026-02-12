@@ -57,7 +57,7 @@ export default async function AdminPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-zinc-600">
-                Tipos activos
+                Platos
               </p>
               <p className="text-2xl font-bold text-black">
                 {stats.ticketTypesCount}
@@ -93,10 +93,14 @@ export default async function AdminPage() {
 
         <BarChart
           title="Tickets por fecha menú (últimos 7 días)"
-          data={stats.ticketsLast7Days.map((d) => ({
-            label: d.date.slice(5), // MM-DD
-            value: d.count,
-          }))}
+          data={stats.ticketsLast7Days.map((d) => {
+            const [y, m, day] = d.date.split("-").map(Number);
+            const shortMonth = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][m - 1];
+            return {
+              label: `${day} ${shortMonth}`,
+              value: d.count,
+            };
+          })}
           className="lg:col-span-1"
         />
       </div>

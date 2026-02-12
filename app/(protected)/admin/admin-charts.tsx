@@ -17,27 +17,30 @@ export function PieChart(props: {
   data: { label: string; value: number; color: string }[];
   className?: string;
 }) {
-  const total = props.data.reduce((acc, d) => acc + d.value, 0) || 1;
+  const total = props.data.reduce((acc, d) => acc + d.value, 0);
+  const hasData = total > 0;
+  const totalForAngle = total || 1;
   let angle = 0;
 
   return (
     <div className={cn("rounded-xl border border-zinc-200 bg-white p-6", props.className)}>
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-black">{props.title}</h2>
-        <span className="text-xs text-zinc-600">Total: {total === 1 && props.data.every((d) => d.value === 0) ? 0 : total}</span>
+        <span className="text-xs text-zinc-600">Total: {total}</span>
       </div>
 
       <div className="mt-4 grid gap-6 sm:grid-cols-[160px_1fr] sm:items-center">
         <svg width="160" height="160" viewBox="0 0 160 160" role="img" aria-label={props.title}>
           <circle cx="80" cy="80" r="76" fill="#f4f4f5" />
-          {props.data.map((d) => {
-            const start = angle;
-            const slice = (d.value / total) * 360;
-            const end = angle + slice;
-            angle = end;
-            if (d.value <= 0) return null;
-            return <path key={d.label} d={describeArc(80, 80, 76, start, end)} fill={d.color} />;
-          })}
+          {hasData &&
+            props.data.map((d) => {
+              const start = angle;
+              const slice = (d.value / totalForAngle) * 360;
+              const end = angle + slice;
+              angle = end;
+              if (d.value <= 0) return null;
+              return <path key={d.label} d={describeArc(80, 80, 76, start, end)} fill={d.color} />;
+            })}
           <circle cx="80" cy="80" r="46" fill="white" />
         </svg>
 
@@ -45,7 +48,7 @@ export function PieChart(props: {
           {props.data.map((d) => (
             <div key={d.label} className="flex items-center justify-between gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: d.color }} />
                 <span className="text-zinc-700">{d.label}</span>
               </div>
               <span className="font-medium text-black">{d.value}</span>
@@ -63,32 +66,39 @@ export function BarChart(props: {
   className?: string;
 }) {
   const max = Math.max(1, ...props.data.map((d) => d.value));
+  const hasAnyValue = props.data.some((d) => d.value > 0);
 
   return (
     <div className={cn("rounded-xl border border-zinc-200 bg-white p-6", props.className)}>
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-black">{props.title}</h2>
-        <span className="text-xs text-zinc-600">Máx: {max === 1 && props.data.every((d) => d.value === 0) ? 0 : max}</span>
+        <span className="text-xs text-zinc-600">
+          {props.data.length === 0 ? "Sin datos" : hasAnyValue ? `Máx: ${max}` : "Máx: 0"}
+        </span>
       </div>
 
       <div className="mt-4 flex h-44 items-end gap-2">
-        {props.data.map((d) => {
-          const h = Math.round((d.value / max) * 100);
-          return (
-            <div key={d.label} className="flex flex-1 flex-col items-center gap-2">
-              <div className="flex w-full flex-1 items-end">
-                <div
-                  className="w-full rounded-md bg-black/80"
-                  style={{ height: `${h}%` }}
-                  title={`${d.label}: ${d.value}`}
-                />
+        {props.data.length === 0 ? (
+          <p className="flex w-full items-center justify-center text-sm text-zinc-500">Sin datos</p>
+        ) : (
+          props.data.map((d) => {
+            const h = Math.round((d.value / max) * 100);
+            return (
+              <div key={d.label} className="flex flex-1 flex-col items-center gap-2">
+                <div className="flex w-full flex-1 items-end">
+                  <div
+                    className="w-full min-h-[2px] rounded-md bg-black/80"
+                    style={{ height: `${h}%` }}
+                    title={`${d.label}: ${d.value}`}
+                  />
+                </div>
+                <div className="text-center text-[11px] leading-tight text-zinc-600 truncate max-w-full">
+                  {d.label}
+                </div>
               </div>
-              <div className="text-center text-[11px] leading-tight text-zinc-600">
-                {d.label}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

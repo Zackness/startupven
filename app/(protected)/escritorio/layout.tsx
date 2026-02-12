@@ -11,6 +11,7 @@ export default async function EscritorioLayout({
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const role = (session.user as unknown as { role?: string })?.role ?? null;
 
   return (
     <SidebarShell
@@ -18,7 +19,7 @@ export default async function EscritorioLayout({
       title="Escritorio"
       subtitle="Comedor universitario"
       maxWidthClass="max-w-5xl"
-      nav={<EscritorioSidebar />}
+      nav={<EscritorioSidebar role={role} />}
       headerRight={
         <>
           <span className="hidden text-sm text-zinc-600 sm:inline">{session.user.name}</span>

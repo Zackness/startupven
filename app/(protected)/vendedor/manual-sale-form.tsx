@@ -49,7 +49,6 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
     return `${y}-${m}-${day}`;
   });
   const [quantity, setQuantity] = React.useState<number>(1);
-  const [markUsed, setMarkUsed] = React.useState<boolean>(false);
 
   const selectedUser = React.useMemo(() => props.users.find((u) => u.id === userId), [props.users, userId]);
 
@@ -65,11 +64,9 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
           ticketTypeId,
           mealDateYmd: mealDate,
           quantity,
-          markUsed,
         });
         setSuccess("Venta registrada.");
         setQuantity(1);
-        setMarkUsed(false);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "No se pudo registrar la venta");
@@ -170,19 +167,6 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
             />
             <p className="text-xs text-zinc-500">Máximo 50 por operación.</p>
           </div>
-
-          <div className="md:col-span-2">
-            <label className="flex items-center gap-2 text-sm text-zinc-700">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-zinc-300"
-                checked={markUsed}
-                onChange={(e) => setMarkUsed(e.target.checked)}
-                disabled={isPending}
-              />
-              Marcar como canjeado (usedAt)
-            </label>
-          </div>
         </div>
 
         <FormError message={error} />
@@ -200,7 +184,6 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
               setUserId("");
               setTicketTypeId("");
               setQuantity(1);
-              setMarkUsed(false);
               setError("");
               setSuccess("");
             }}

@@ -14,20 +14,24 @@ export default async function AdminLayout({
   if (!session?.user) redirect("/login");
 
   const user = session.user as unknown as { role?: string };
-  if (user.role !== "ADMIN") {
+  const isAdmin = user.role === "ADMIN";
+  const isEditor = user.role === "EDITOR";
+  if (!isAdmin && !isEditor) {
     redirect(ESCRITORIO_PATH);
   }
 
   return (
     <SidebarShell
       storageKey="sidebar:admin:open"
-      title="Administración"
+      title={isEditor ? "Platos" : "Administración"}
       subtitle="Comedor universitario"
       maxWidthClass="max-w-6xl"
-      nav={<AdminSidebar />}
+      nav={<AdminSidebar isEditor={isEditor} />}
       headerRight={
         <>
-          <span className="hidden text-sm text-zinc-600 sm:inline">{session.user.name} (Admin)</span>
+          <span className="hidden text-sm text-zinc-600 sm:inline">
+            {session.user.name} ({isEditor ? "Editor" : "Admin"})
+          </span>
           <UserButton />
         </>
       }

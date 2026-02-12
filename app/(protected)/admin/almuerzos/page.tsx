@@ -42,13 +42,16 @@ export default async function AdminTiposPage() {
                   <span className="rounded bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 border border-zinc-200">
                     {t.category}
                   </span>
+                  <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-800 border border-sky-200">
+                    {t.lugar === "CANTINA" ? "Cantina" : "Comedor"}
+                  </span>
                   {t.name}
                   {!t.active && (
                     <span className="ml-2 text-sm text-zinc-500">(inactivo)</span>
                   )}
                 </p>
                 <div className="text-sm text-zinc-600">
-                  <span>${Number(t.price).toFixed(2)}</span>
+                  <span>Bs. {Number(t.price).toFixed(2)}</span>
                   {t.availableForDate && (
                     <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
                       📅 {t.availableForDate.toLocaleDateString()}

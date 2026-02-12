@@ -8,11 +8,12 @@ import { ImageUpload } from "./image-upload";
 
 export function CreateTicketTypeForm() {
   const [isPending, startTransition] = useTransition();
-  const [isSpecificDate, setIsSpecificDate] = useState(false);
+  const [lugar, setLugar] = useState<"COMEDOR" | "CANTINA">("COMEDOR");
   const [imageUrl, setImageUrl] = useState("");
 
   async function handleSubmit(formData: FormData) {
-    if (!isSpecificDate) {
+    const lugarValue = (formData.get("lugar") as string) || "COMEDOR";
+    if (lugarValue === "CANTINA") {
       formData.delete("availableForDate");
     }
 
@@ -23,7 +24,7 @@ export function CreateTicketTypeForm() {
         // Reset form manually or via key
         const form = document.getElementById("create-type-form") as HTMLFormElement;
         form.reset();
-        setIsSpecificDate(false);
+        setLugar("COMEDOR");
       } catch (error) {
         toast.error("Error al crear tipo");
       }
@@ -66,7 +67,21 @@ export function CreateTicketTypeForm() {
           </select>
         </div>
         <div className="space-y-2">
-          <label htmlFor="price" className="block text-sm font-medium text-black">Precio</label>
+          <label htmlFor="lugar" className="block text-sm font-medium text-black">Lugar</label>
+          <select
+            id="lugar"
+            name="lugar"
+            required
+            value={lugar}
+            onChange={(e) => setLugar(e.target.value as "COMEDOR" | "CANTINA")}
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black"
+          >
+            <option value="COMEDOR">Comedor</option>
+            <option value="CANTINA">Cantina</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="price" className="block text-sm font-medium text-black">Precio (Bs.)</label>
           <input
             id="price"
             name="price"
@@ -89,36 +104,23 @@ export function CreateTicketTypeForm() {
         />
       </div>
 
-      <div className="space-y-3 rounded-lg border border-zinc-200 p-3 bg-zinc-50">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="specific-date-check"
-            checked={isSpecificDate}
-            onChange={(e) => setIsSpecificDate(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
-          />
-          <label htmlFor="specific-date-check" className="cursor-pointer font-medium text-sm text-black">
-            Es para una fecha específica (Ticket de un solo día)
+      {lugar === "COMEDOR" && (
+        <div className="space-y-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+          <label htmlFor="availableForDate" className="block text-sm font-medium text-black">
+            Fecha del menú (obligatoria para comedor)
           </label>
+          <input
+            id="availableForDate"
+            name="availableForDate"
+            type="date"
+            required={lugar === "COMEDOR"}
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black sm:w-auto"
+          />
+          <p className="text-xs text-zinc-500">
+            Los usuarios solo podrán comprar este plato para esta fecha.
+          </p>
         </div>
-
-        {isSpecificDate && (
-          <div className="space-y-2 pl-6">
-            <label htmlFor="availableForDate" className="block text-sm font-medium text-black">Fecha del evento/comida</label>
-            <input
-              id="availableForDate"
-              name="availableForDate"
-              type="date"
-              required={isSpecificDate}
-              className="w-full sm:w-auto rounded-md border border-zinc-300 bg-white px-3 py-2 text-black"
-            />
-            <p className="text-xs text-zinc-500">
-              Los usuarios solo podrán comprar este plato para esta fecha exacta.
-            </p>
-          </div>
-        )}
-      </div>
+      )}
 
       <Button type="submit" disabled={isPending} className="bg-blue-800 hover:bg-blue-600 text-white">
         {isPending ? "Creando..." : "Crear Almuerzo"}
