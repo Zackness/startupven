@@ -1,12 +1,11 @@
-import {
-  getAdminTicketTypes,
-  getAdminTicketsFiltered,
-  getAdminUsersForTicketsFilter,
-} from "@/lib/actions/tickets";
+import { getAdminTicketTypes, getAdminTicketsFiltered, getAdminUsersForTicketsFilter } from "@/lib/actions/tickets";
 import { MarkUsedButton } from "./mark-used-button";
 import { ApproveButton } from "./approve-button";
+import { DeleteTicketButton } from "./delete-ticket-button";
 import { TicketFilters } from "./ticket-filters";
 import { getTodayStartUTC } from "@/lib/utils";
+import Link from "next/link";
+import { ADMIN_PATH } from "@/routes";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -123,7 +122,7 @@ export default async function AdminTicketsPage({
                           <span className="text-zinc-400">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 flex gap-2">
+                      <td className="px-4 py-3 flex flex-wrap gap-2">
                         {t.paymentStatus === "PENDIENTE" ? (
                           <ApproveButton ticketId={t.id} />
                         ) : !t.usedAt && !isCancelled ? (
@@ -131,6 +130,12 @@ export default async function AdminTicketsPage({
                         ) : isCancelled ? (
                           <span className="text-xs text-zinc-500">Vencido</span>
                         ) : null}
+                        <Link href={`${ADMIN_PATH}/tickets/${t.id}`}>
+                          <button className="inline-flex items-center rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50">
+                            Editar
+                          </button>
+                        </Link>
+                        <DeleteTicketButton ticketId={t.id} />
                       </td>
                     </tr>
                   );

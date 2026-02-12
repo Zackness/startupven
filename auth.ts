@@ -23,10 +23,17 @@ export const auth = betterAuth({
   // Sesiones más largas (sliding sessions): se renuevan mientras el usuario use la app.
   // Unidades en segundos.
   session: {
-    // 30 días
-    expiresIn: 60 * 60 * 24 * 30,
+    // 365 días (1 año). Mientras el usuario use la app y tenga "Mantener sesión activa"
+    // la sesión se irá renovando y, en la práctica, no debería cerrarse sola.
+    expiresIn: 60 * 60 * 24 * 365,
     // Renovar expiración como mínimo cada 24h de uso
     updateAge: 60 * 60 * 24,
+    // Cachear la sesión en cookie para reducir lecturas a la base de datos
+    cookieCache: {
+      enabled: true,
+      // Tiempo que se puede reutilizar la sesión desde la cookie sin ir a la BD
+      maxAge: 60 * 60 * 24 * 7, // 7 días
+    },
   },
   user: {
     changeEmail: {

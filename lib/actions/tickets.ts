@@ -338,7 +338,6 @@ export async function getUsersForManualSale() {
       createdAt: true,
     },
     orderBy: { createdAt: "desc" },
-    take: 500,
   });
 
   const label = (u: (typeof users)[number]) => {
@@ -766,6 +765,66 @@ export async function getTicketByIdForScan(ticketId: string) {
   };
 }
 
+export async function getTicketForAdminEdit(ticketId: string) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const current = session.user as unknown as { role?: string };
+  if (current.role !== "ADMIN") redirect("/escritorio");
+
+  const ticket = await db.ticket.findUnique({
+    where: { id: ticketId },
+    include: {
+      ticketType: true,
+      user: { select: { name: true, email: true } },
+    },
+  });
+
+  if (!ticket) return null;
+
+  return {
+    id: ticket.id,
+    userName: ticket.user.name,
+    userEmail: ticket.user.email,
+    ticketTypeId: ticket.ticketTypeId,
+    ticketTypeName: ticket.ticketType.name,
+    mealDateYmd: ticket.mealDate.toISOString().slice(0, 10),
+    paymentStatus: ticket.paymentStatus as TicketPaymentStatus,
+    paymentReference: ticket.paymentReference ?? "",
+    paymentBank: ticket.paymentBank ?? "",
+  };
+}
+
+export async function updateTicketAdmin(input: {
+  id: string;
+  ticketTypeId: string;
+  mealDateYmd: string;
+  paymentStatus: TicketPaymentStatus;
+  paymentReference?: string;
+  paymentBank?: string;
+}) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const current = session.user as unknown as { role?: string };
+  if (current.role !== "ADMIN") redirect("/escritorio");
+
+  const mealDate = parseLocalYmd(input.mealDateYmd);
+  if (!mealDate) throw new Error("Fecha inválida");
+
+  await db.ticket.update({
+    where: { id: input.id },
+    data: {
+      ticketTypeId: input.ticketTypeId,
+      mealDate,
+      paymentStatus: input.paymentStatus,
+      paymentReference: input.paymentReference?.trim() || null,
+      paymentBank: input.paymentBank?.trim() || null,
+    },
+  });
+
+  revalidatePath("/admin/tickets");
+  revalidatePath("/escritorio/mis-tickets");
+}
+
 export async function markTicketUsed(ticketId: string) {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -805,6 +864,20 @@ export async function approveTicket(ticketId: string) {
   });
   revalidatePath("/admin/tickets");
   revalidatePath("/editor");
+}
+
+export async function deleteTicketAdmin(ticketId: string) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const user = session.user as unknown as { role?: string };
+  if (user.role !== "ADMIN") redirect("/escritorio");
+
+  await db.ticket.delete({
+    where: { id: ticketId },
+  });
+
+  revalidatePath("/admin/tickets");
+  revalidatePath("/escritorio/mis-tickets");
 }
 
 export async function processExpiredTickets() {
