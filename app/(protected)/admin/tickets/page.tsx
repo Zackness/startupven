@@ -6,6 +6,8 @@ import { TicketFilters } from "./ticket-filters";
 import { getTodayStartUTC } from "@/lib/utils";
 import Link from "next/link";
 import { ADMIN_PATH } from "@/routes";
+import { Button } from "@/components/ui/button";
+import { QrCode } from "lucide-react";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -53,13 +55,21 @@ export default async function AdminTicketsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-black">
-          Tickets vendidos
-        </h1>
-        <p className="mt-1 text-zinc-600">
-          Listado de todos los tickets y estado de canje
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-black">
+            Tickets vendidos
+          </h1>
+          <p className="mt-1 text-zinc-600">
+            Listado de todos los tickets y estado de canje
+          </p>
+        </div>
+        <Link href={`${ADMIN_PATH}/escaneo`}>
+          <Button className="gap-2 bg-black text-white hover:bg-zinc-800">
+            <QrCode className="h-4 w-4" />
+            Escanear QR
+          </Button>
+        </Link>
       </div>
 
       <TicketFilters

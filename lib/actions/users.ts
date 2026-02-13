@@ -188,6 +188,35 @@ export async function setUserPasswordAsAdmin(userId: string, newPassword: string
     });
   }
 
+  await db.user.update({
+    where: { id: userId },
+    data: { requiresPasswordChange: false },
+  });
+
   revalidatePath("/admin/usuarios");
   revalidatePath(`/admin/usuarios/${userId}`);
+}
+
+/** Marca que el usuario actual ya actualizó su correo (deja de obligar). */
+export async function clearRequiresEmailChange() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { requiresEmailChange: false },
+  });
+  revalidatePath("/actualizar-credenciales");
+  revalidatePath("/escritorio/cuenta");
+}
+
+/** Marca que el usuario actual ya actualizó su contraseña (deja de obligar). */
+export async function clearRequiresPasswordChange() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { requiresPasswordChange: false },
+  });
+  revalidatePath("/actualizar-credenciales");
+  revalidatePath("/escritorio/cuenta");
 }

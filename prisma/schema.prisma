@@ -54,6 +54,8 @@ model User {
   wallet           WalletTransaction[]
   paymentReports   PaymentReport[]
   balance          Decimal   @default(0) @db.Decimal(10, 2)
+  requiresEmailChange    Boolean @default(false) // Obligar a cambiar si es temporal (no institucional)
+  requiresPasswordChange Boolean @default(false) // Obligar a cambiar si sigue con contraseña por defecto
 }
 
 // Lugar de la comida: cantina o comedor
@@ -90,22 +92,24 @@ enum TicketPaymentStatus {
   REEMBOLSADO
 }
 
-// Ticket comprado por un usuario (una comida canjeable)
+// Ticket comprado por un usuario o por un invitado (una comida canjeable)
 model Ticket {
   id            String              @id @default(cuid())
-  userId        String
+  userId        String?             // null = venta a invitado
   ticketTypeId  String
   mealDate      DateTime            @db.Date
   usedAt        DateTime?
   paymentStatus TicketPaymentStatus @default(PENDIENTE)
   createdAt     DateTime            @default(now())
-  user          User       @relation("TicketBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  user          User?       @relation("TicketBuyer", fields: [userId], references: [id], onDelete: Cascade)
   ticketType    TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
   paymentMethod    String              @default("PAGO_MOVIL") // "PAGO_MOVIL" | "STRIPE"
   paymentReference String?
   paymentBank      String?
   sellerId         String?
   seller           User?      @relation("TicketSeller", fields: [sellerId], references: [id], onDelete: SetNull)
+  guestName        String?             // Nombre del invitado (cuando userId es null)
+  guestInstitution String?             // Institución del invitado
   @@index([userId])
   @@index([mealDate])
   @@index([sellerId])

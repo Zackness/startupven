@@ -1,6 +1,7 @@
 "use client";
 
 import { QRCodeSVG } from "qrcode.react";
+import { QrCode } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 /**
  * Código QR único por ticket. El valor codificado es el ID del ticket
@@ -46,6 +48,38 @@ export function TicketQR({ ticketId, size = 80 }: { ticketId: string; size?: num
           <QRCodeSVG
             value={ticketId}
             size={240}
+            level="M"
+            bgColor="#ffffff"
+            fgColor="#000000"
+            title={`Ticket ${ticketId}`}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Botón para abrir el QR del ticket en grande (p. ej. en listado del vendedor para pasarlo al cliente/invitado). */
+export function TicketQRViewButton({ ticketId }: { ticketId: string }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="gap-1.5 border-zinc-300 text-zinc-700 hover:bg-zinc-50">
+          <QrCode className="h-4 w-4" />
+          Ver QR
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm border-zinc-200 bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Código QR del ticket</DialogTitle>
+          <DialogDescription>
+            Puedes mostrar este QR en grande al cliente o invitado para que lo use al canjear. Útil si no tiene cuenta en el sistema.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center py-6">
+          <QRCodeSVG
+            value={ticketId}
+            size={280}
             level="M"
             bgColor="#ffffff"
             fgColor="#000000"

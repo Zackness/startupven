@@ -39,16 +39,25 @@ export function EscaneoQRPage() {
       if (canAutoMark) {
         await markTicketUsed(data.id);
         setTicket({ ...ticketInfo, usedAt: new Date() });
-        toast.success("Ticket canjeado");
+        toast.success("¡Escaneo exitoso!", {
+          description: "El ticket fue canjeado correctamente. El cliente verá la actualización en su pantalla.",
+          duration: 4500,
+        });
       } else {
         setTicket(ticketInfo);
-        if (usedAt) toast.success("Ticket ya estaba canjeado");
-        else toast.success("Ticket leído");
+        if (usedAt) {
+          toast.success("¡Escaneo exitoso!", {
+            description: "Este ticket ya estaba canjeado.",
+            duration: 4000,
+          });
+        } else {
+          toast.success("Ticket leído", { duration: 3000 });
+        }
       }
     } catch {
       setTicket(null);
       setError("Error al consultar el ticket.");
-      toast.error("Error al consultar");
+      toast.error("Error al consultar", { duration: 4000 });
     } finally {
       setLoading(false);
     }

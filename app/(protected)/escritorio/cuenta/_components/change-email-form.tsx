@@ -10,6 +10,7 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { ChangeEmailSchema, type ChangeEmailSchemaType } from "@/schemas";
 import { authClient } from "@/lib/better-auth-client";
+import { clearRequiresEmailChange } from "@/lib/actions/users";
 
 export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
   const [error, setError] = useState<string | undefined>("");
@@ -37,6 +38,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
         setError(err.message ?? "No se pudo cambiar el correo.");
         return;
       }
+      await clearRequiresEmailChange();
       setSuccess("Correo actualizado correctamente.");
       form.reset({ newEmail: values.newEmail });
     });

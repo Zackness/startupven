@@ -337,8 +337,8 @@ export async function getAdminTickets(page = 0, pageSize = 20) {
   return {
     tickets: tickets.map((t) => ({
       id: t.id,
-      userName: t.user.name,
-      userEmail: t.user.email,
+      userName: t.user?.name ?? t.guestName ?? "Invitado",
+      userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
@@ -392,7 +392,9 @@ export async function getUsersForManualSale() {
 }
 
 export async function createManualSale(input: {
-  userId: string;
+  userId?: string | null;
+  guestName?: string | null;
+  guestInstitution?: string | null;
   ticketTypeId: string;
   mealDateYmd: string;
   quantity: number;
@@ -405,8 +407,15 @@ export async function createManualSale(input: {
 
   const quantity = Number.isFinite(input.quantity) ? Math.floor(input.quantity) : 1;
   if (quantity < 1 || quantity > 50) throw new Error("La cantidad debe estar entre 1 y 50");
-  if (!input.userId) throw new Error("Selecciona un usuario");
   if (!input.ticketTypeId) throw new Error("Selecciona un tipo de ticket");
+
+  const isGuest = !input.userId?.trim();
+  if (isGuest) {
+    if (!input.guestName?.trim()) throw new Error("Indica el nombre del invitado");
+    if (!input.guestInstitution?.trim()) throw new Error("Indica la institución del invitado");
+  } else {
+    if (!input.userId) throw new Error("Selecciona un usuario o completa datos de invitado");
+  }
 
   const mealDate = parseLocalYmd(input.mealDateYmd);
   if (!mealDate) throw new Error("Fecha inválida");
@@ -427,7 +436,9 @@ export async function createManualSale(input: {
 
   await db.ticket.createMany({
     data: Array.from({ length: quantity }).map(() => ({
-      userId: input.userId,
+      userId: isGuest ? null : input.userId,
+      guestName: isGuest ? input.guestName!.trim() : null,
+      guestInstitution: isGuest ? input.guestInstitution!.trim() : null,
       ticketTypeId: type.id,
       mealDate,
       usedAt,
@@ -495,8 +506,8 @@ export async function getAdminTicketsFiltered(
   return {
     tickets: tickets.map((t) => ({
       id: t.id,
-      userName: t.user.name,
-      userEmail: t.user.email,
+      userName: t.user?.name ?? t.guestName ?? "Invitado",
+      userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
@@ -548,7 +559,7 @@ export async function getVendorTicketsFiltered(
   const [tickets, total] = await Promise.all([
     db.ticket.findMany({
       where,
-      include: { user: { select: { name: true, email: true } }, ticketType: true },
+      include: { user: { select: { name: true, email: true, cedula: true, expediente: true } }, ticketType: true },
       orderBy: { createdAt: "desc" },
       skip: page * pageSize,
       take: pageSize,
@@ -559,11 +570,15 @@ export async function getVendorTicketsFiltered(
   return {
     tickets: tickets.map((t) => ({
       id: t.id,
-      userName: t.user.name,
-      userEmail: t.user.email,
+      userName: t.user?.name ?? t.guestName ?? "Invitado",
+      userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
+      userCedula: t.user?.cedula ?? null,
+      userExpediente: t.user?.expediente ?? null,
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
+      paymentReference: t.paymentReference,
+      paymentBank: t.paymentBank,
     })),
     total,
   };
@@ -606,8 +621,8 @@ export async function getEditorTicketsFiltered(
   return {
     tickets: tickets.map((t) => ({
       id: t.id,
-      userName: t.user.name,
-      userEmail: t.user.email,
+      userName: t.user?.name ?? t.guestName ?? "Invitado",
+      userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
@@ -786,6 +801,8 @@ export async function getTicketByIdForScan(ticketId: string) {
       mealDate: true,
       usedAt: true,
       paymentStatus: true,
+      guestName: true,
+      guestInstitution: true,
       user: { select: { name: true, email: true } },
       ticketType: { select: { name: true } },
     },
@@ -793,8 +810,8 @@ export async function getTicketByIdForScan(ticketId: string) {
   if (!ticket) return null;
   return {
     id: ticket.id,
-    userName: ticket.user.name,
-    userEmail: ticket.user.email,
+    userName: ticket.user?.name ?? ticket.guestName ?? "Invitado",
+    userEmail: ticket.user?.email ?? (ticket.guestInstitution ? `(${ticket.guestInstitution})` : "-"),
     ticketTypeName: ticket.ticketType.name,
     mealDate: ticket.mealDate,
     usedAt: ticket.usedAt,
@@ -820,8 +837,8 @@ export async function getTicketForAdminEdit(ticketId: string) {
 
   return {
     id: ticket.id,
-    userName: ticket.user.name,
-    userEmail: ticket.user.email,
+    userName: ticket.user?.name ?? ticket.guestName ?? "Invitado",
+    userEmail: ticket.user?.email ?? (ticket.guestInstitution ? `(${ticket.guestInstitution})` : "-"),
     ticketTypeId: ticket.ticketTypeId,
     ticketTypeName: ticket.ticketType.name,
     mealDateYmd: ticket.mealDate.toISOString().slice(0, 10),

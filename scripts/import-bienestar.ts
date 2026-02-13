@@ -175,6 +175,7 @@ async function main() {
 
   for (const u of toInsert) {
     try {
+      const isInstitutionalEmail = u.email.toLowerCase().includes("@unexpo.edu.ve");
       const user = await db.user.create({
         data: {
           email: u.email,
@@ -188,6 +189,8 @@ async function main() {
           segundoNombre: u.segundoNombre,
           primerApellido: u.primerApellido,
           segundoApellido: u.segundoApellido,
+          requiresEmailChange: !isInstitutionalEmail,
+          requiresPasswordChange: true,
         },
         select: { id: true, email: true },
       });

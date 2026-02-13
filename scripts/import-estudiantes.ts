@@ -165,6 +165,8 @@ async function main() {
           segundoNombre: u.segundoNombre,
           primerApellido: u.primerApellido,
           segundoApellido: u.segundoApellido,
+          requiresEmailChange: true,
+          requiresPasswordChange: true,
         },
         select: { id: true, email: true },
       });

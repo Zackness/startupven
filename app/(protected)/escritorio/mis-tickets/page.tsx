@@ -1,5 +1,6 @@
 import { getMyTickets } from "@/lib/actions/tickets";
 import { TicketQR } from "@/components/ticket-qr";
+import { TicketCanjeadoNotifier } from "./ticket-canjeado-notifier";
 import { Ticket, CheckCircle, Clock, XCircle } from "lucide-react";
 
 function formatDate(d: Date) {
@@ -17,6 +18,7 @@ export default async function MisTicketsPage() {
 
   return (
     <div className="space-y-6">
+      <TicketCanjeadoNotifier initialTickets={tickets.map((t) => ({ id: t.id, status: t.status }))} />
       <div>
         <h1 className="text-2xl font-bold text-black">
           Mis tickets

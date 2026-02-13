@@ -10,6 +10,7 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { ChangePasswordSchema, type ChangePasswordSchemaType } from "@/schemas";
 import { authClient } from "@/lib/better-auth-client";
+import { clearRequiresPasswordChange } from "@/lib/actions/users";
 import { Eye, EyeOff } from "lucide-react";
 
 export function ChangePasswordForm() {
@@ -37,6 +38,7 @@ export function ChangePasswordForm() {
         setError(err.message ?? "No se pudo cambiar la contraseña.");
         return;
       }
+      await clearRequiresPasswordChange();
       setSuccess("Contraseña actualizada correctamente.");
       form.reset({ currentPassword: "", newPassword: "" });
     });

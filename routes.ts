@@ -73,6 +73,9 @@ export const EDITOR_PATH = "/editor";
  */
 export const DEFAULT_LOGIN_REDIRECT = ESCRITORIO_PATH;
 
+/** Ruta obligatoria para usuarios con correo/contraseña temporales */
+export const ACTUALIZAR_CREDENCIALES_PATH = "/actualizar-credenciales";
+
 /**
  * Rutas que requieren rol ADMIN (solo estas prefijan /admin)
  */

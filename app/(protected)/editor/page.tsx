@@ -3,9 +3,10 @@ import { ApproveButton } from "@/app/(protected)/admin/tickets/approve-button";
 import { MarkUsedButton } from "@/app/(protected)/admin/tickets/mark-used-button";
 import { EditorTicketFilters } from "./editor-ticket-filters";
 import Link from "next/link";
-import { ESCRITORIO_PATH } from "@/routes";
+import { ESCRITORIO_PATH, EDITOR_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { getTodayStartUTC } from "@/lib/utils";
+import { QrCode } from "lucide-react";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -49,11 +50,19 @@ export default async function EditorPage({
             Aprobar compras: filtra por cédula o fecha y aprueba pagos pendientes.
           </p>
         </div>
-        <Link href={ESCRITORIO_PATH}>
-          <Button variant="outline" size="sm">
-            Ir a escritorio
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href={`${EDITOR_PATH}/escaneo`}>
+            <Button size="sm" className="gap-2 bg-black text-white hover:bg-zinc-800">
+              <QrCode className="h-4 w-4" />
+              Escanear QR
+            </Button>
+          </Link>
+          <Link href={ESCRITORIO_PATH}>
+            <Button variant="outline" size="sm">
+              Ir a escritorio
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-4">

@@ -1,5 +1,6 @@
 import { getVendorTicketsFiltered } from "@/lib/actions/tickets";
 import { getTodayStartUTC } from "@/lib/utils";
+import { TicketQRViewButton } from "@/components/ticket-qr";
 
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString("es-ES", {
@@ -105,10 +106,13 @@ export default async function VendedorTicketsPage({
             <thead className="border-b border-zinc-200 bg-zinc-50">
               <tr>
                 <th className="px-4 py-3 font-medium text-black">Usuario</th>
+                <th className="px-4 py-3 font-medium text-black">C.I.</th>
+                <th className="px-4 py-3 font-medium text-black">Expediente</th>
                 <th className="px-4 py-3 font-medium text-black">Tipo</th>
                 <th className="px-4 py-3 font-medium text-black">Fecha menú</th>
                 <th className="px-4 py-3 font-medium text-black">Estado</th>
-                <th className="px-4 py-3 font-medium text-black">Acción</th>
+                <th className="px-4 py-3 font-medium text-black">Referencia / Pago</th>
+                <th className="px-4 py-3 font-medium text-black">Ver QR</th>
               </tr>
             </thead>
             <tbody>
@@ -120,6 +124,8 @@ export default async function VendedorTicketsPage({
                       <p className="font-medium text-black">{t.userName}</p>
                       <p className="text-xs text-zinc-600">{t.userEmail}</p>
                     </td>
+                    <td className="px-4 py-3 text-zinc-700">{t.userCedula ?? "—"}</td>
+                    <td className="px-4 py-3 text-zinc-700">{t.userExpediente ?? "—"}</td>
                     <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
                     <td className="px-4 py-3 text-zinc-700">{formatDate(t.mealDate)}</td>
                     <td className="px-4 py-3">
@@ -137,12 +143,18 @@ export default async function VendedorTicketsPage({
                         </span>
                       )}
                     </td>
+                    <td className="px-4 py-3 text-sm">
+                      {t.paymentReference || t.paymentBank ? (
+                        <div className="flex flex-col">
+                          <span className="font-medium text-black">{t.paymentReference ?? "—"}</span>
+                          <span className="text-xs text-zinc-500">{t.paymentBank ?? ""}</span>
+                        </div>
+                      ) : (
+                        <span className="text-zinc-400">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
-                      {!t.usedAt && !isCancelled ? (
-                        <span className="text-xs text-zinc-500">Comprado</span>
-                      ) : isCancelled ? (
-                        <span className="text-xs text-zinc-500">Vencido</span>
-                      ) : null}
+                      <TicketQRViewButton ticketId={t.id} />
                     </td>
                   </tr>
                 );
