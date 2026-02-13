@@ -968,19 +968,22 @@ export async function processExpiredTickets() {
         data: { paymentStatus: "REEMBOLSADO" }
       });
 
-      await tx.user.update({
-        where: { id: ticket.userId },
-        data: { balance: { increment: ticket.ticketType.price } }
-      });
+      // Solo reembolsar balance y crear transacción si el ticket es de un usuario registrado (no invitado)
+      if (ticket.userId) {
+        await tx.user.update({
+          where: { id: ticket.userId },
+          data: { balance: { increment: ticket.ticketType.price } }
+        });
 
-      await tx.walletTransaction.create({
-        data: {
-          userId: ticket.userId,
-          amount: ticket.ticketType.price,
-          type: "REEMBOLSO",
-          reference: `Reembolso por vencimiento: ${ticket.ticketType.name} (${ticket.mealDate.toISOString().slice(0, 10)})`
-        }
-      });
+        await tx.walletTransaction.create({
+          data: {
+            userId: ticket.userId,
+            amount: ticket.ticketType.price,
+            type: "REEMBOLSO",
+            reference: `Reembolso por vencimiento: ${ticket.ticketType.name} (${ticket.mealDate.toISOString().slice(0, 10)})`
+          }
+        });
+      }
     });
   }
 
