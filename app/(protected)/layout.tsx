@@ -14,12 +14,14 @@ export default async function ProtectedLayout({
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { requiresEmailChange: true, requiresPasswordChange: true },
+    select: { role: true, requiresEmailChange: true, requiresPasswordChange: true },
   });
 
+  // Obligatorio cambiar correo/contraseña para todos menos ADMIN (p. ej. usuarios creados por script)
   const mustUpdateCredentials = !!(
-    user?.requiresEmailChange ||
-    user?.requiresPasswordChange
+    user &&
+    user.role !== "ADMIN" &&
+    (user.requiresEmailChange || user.requiresPasswordChange)
   );
 
   return (

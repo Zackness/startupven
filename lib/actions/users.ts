@@ -115,7 +115,7 @@ export async function createAdminUser(data: {
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
-  // Crear usuario y vincular cuenta "credential" (formato esperado por Better Auth)
+  // Crear usuario con correo y contraseña temporales: obligar a cambiarlos en el primer acceso
   const user = await db.user.create({
     data: {
       email,
@@ -129,6 +129,8 @@ export async function createAdminUser(data: {
       segundoNombre: data.segundoNombre ?? null,
       primerApellido: data.primerApellido ?? null,
       segundoApellido: data.segundoApellido ?? null,
+      requiresEmailChange: true,
+      requiresPasswordChange: true,
     },
     select: { id: true, email: true },
   });
@@ -188,9 +190,10 @@ export async function setUserPasswordAsAdmin(userId: string, newPassword: string
     });
   }
 
+  // La contraseña que pone el admin es temporal: el usuario debe cambiarla
   await db.user.update({
     where: { id: userId },
-    data: { requiresPasswordChange: false },
+    data: { requiresPasswordChange: true },
   });
 
   revalidatePath("/admin/usuarios");

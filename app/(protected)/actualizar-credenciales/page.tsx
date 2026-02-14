@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { ESCRITORIO_PATH } from "@/routes";
 import { ActualizarCredencialesForm } from "./_components/actualizar-credenciales-form";
+import { SignOutButton } from "./_components/sign-out-button";
 
 export default async function ActualizarCredencialesPage() {
   const session = await auth();
@@ -40,6 +41,10 @@ export default async function ActualizarCredencialesPage() {
           requireEmail={user.requiresEmailChange}
           requirePassword={user.requiresPasswordChange}
         />
+
+        <div className="pt-2 border-t border-zinc-200">
+          <SignOutButton />
+        </div>
       </div>
     </div>
   );
