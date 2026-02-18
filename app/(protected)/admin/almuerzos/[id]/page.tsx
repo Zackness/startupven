@@ -52,6 +52,7 @@ export default async function AdminEditPlatoPage({
             description: plato.description,
             image: plato.image,
             availableForDate: plato.availableForDate,
+            maxQuantity: plato.maxQuantity,
             active: plato.active,
           }}
         />

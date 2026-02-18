@@ -74,6 +74,7 @@ model TicketType {
   description      String?
   image            String?       // URL de la imagen (BunnyCDN)
   availableForDate DateTime?    @db.Date // Si tiene valor, el ticket solo vale para esta fecha; al pasar se desactiva
+  maxQuantity      Int?          // Límite de comidas para este plato (null = sin límite)
   active           Boolean      @default(true)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt

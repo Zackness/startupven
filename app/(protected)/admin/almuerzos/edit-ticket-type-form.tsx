@@ -15,6 +15,7 @@ type Plato = {
   description: string | null;
   image: string | null;
   availableForDate: Date | null;
+  maxQuantity: number | null;
   active: boolean;
 };
 
@@ -118,6 +119,23 @@ export function EditTicketTypeForm({ plato }: { plato: Plato }) {
             placeholder="0.00"
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black"
           />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="maxQuantity" className="block text-sm font-medium text-black">
+            Cantidad máxima de comidas (opcional)
+          </label>
+          <input
+            id="maxQuantity"
+            name="maxQuantity"
+            type="number"
+            min={1}
+            placeholder="Sin límite"
+            defaultValue={plato.maxQuantity ?? ""}
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-black"
+          />
+          <p className="text-xs text-zinc-500">
+            Límite de tickets que se pueden vender para este plato (por fecha). Vacío = sin límite.
+          </p>
         </div>
       </div>
 

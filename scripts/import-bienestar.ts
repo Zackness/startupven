@@ -15,6 +15,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import bcrypt from "bcryptjs";
 import { db } from "../lib/db";
+import { isInstitutionalEmail } from "../lib/email";
 import { UserRole, Gremio } from "../lib/generated/prisma/enums";
 
 const MD_PATH = join(process.cwd(), "base_datos_bienestar_estudiantil.md");
@@ -175,12 +176,12 @@ async function main() {
 
   for (const u of toInsert) {
     try {
-      const isInstitutionalEmail = u.email.toLowerCase().includes("@unexpo.edu.ve");
+      const institutional = isInstitutionalEmail(u.email);
       const user = await db.user.create({
         data: {
           email: u.email,
           name: u.name,
-          emailVerified: true,
+          emailVerified: institutional,
           role: UserRole.CLIENTE,
           gremio: u.gremio === "OBRERO" ? Gremio.OBRERO : Gremio.PROFESORES,
           cedula: u.cedula,
@@ -189,7 +190,7 @@ async function main() {
           segundoNombre: u.segundoNombre,
           primerApellido: u.primerApellido,
           segundoApellido: u.segundoApellido,
-          requiresEmailChange: !isInstitutionalEmail,
+          requiresEmailChange: !institutional,
           requiresPasswordChange: true,
         },
         select: { id: true, email: true },

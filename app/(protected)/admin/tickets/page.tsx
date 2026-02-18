@@ -84,6 +84,7 @@ export default async function AdminTicketsPage({
             <thead className="border-b border-zinc-200 bg-zinc-50">
               <tr>
                 <th className="px-4 py-3 font-medium text-black">Usuario</th>
+                <th className="px-4 py-3 font-medium text-black">Vendedor</th>
                 <th className="px-4 py-3 font-medium text-black">Tipo</th>
                 <th className="px-4 py-3 font-medium text-black">Fecha menú</th>
                 <th className="px-4 py-3 font-medium text-black">Estado</th>
@@ -100,6 +101,16 @@ export default async function AdminTicketsPage({
                       <td className="px-4 py-3">
                         <p className="font-medium text-black">{t.userName}</p>
                         <p className="text-xs text-zinc-600">{t.userEmail}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        {t.sellerName || t.sellerEmail ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium text-black">{t.sellerName ?? "—"}</span>
+                            <span className="text-xs text-zinc-600">{t.sellerEmail ?? ""}</span>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-400">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
                       <td className="px-4 py-3 text-zinc-700">{formatDate(t.mealDate)}</td>

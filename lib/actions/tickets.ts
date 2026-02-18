@@ -96,12 +96,26 @@ export async function buyTicket(
 
   const type = await db.ticketType.findFirst({
     where: { id: ticketTypeId, active: true },
+    select: { id: true, name: true, price: true, lugar: true, maxQuantity: true },
   });
   if (!type) throw new Error("Tipo de ticket no disponible");
 
   // Normalizar fecha (solo día) para coherencia con @db.Date
   const mealDateNorm = new Date(mealDate);
   mealDateNorm.setHours(0, 0, 0, 0);
+
+  if (type.maxQuantity != null) {
+    const sold = await db.ticket.count({
+      where: {
+        ticketTypeId: type.id,
+        mealDate: mealDateNorm,
+        paymentStatus: { not: "REEMBOLSADO" },
+      },
+    });
+    if (sold >= type.maxQuantity) {
+      throw new Error("No hay cupo disponible para este plato en la fecha seleccionada.");
+    }
+  }
 
   // Regla de negocio: por la página de cliente SOLO se permite
   // un ticket de COMEDOR por día. Si ya tiene uno, debe pedir
@@ -144,6 +158,19 @@ export async function buyTicket(
           throw new Error(
             "Ya tienes un ticket de comedor para ese día. Si necesitas otra comida, pídele al vendedor que la registre manualmente."
           );
+        }
+      }
+
+      if (type.maxQuantity != null) {
+        const sold = await tx.ticket.count({
+          where: {
+            ticketTypeId: type.id,
+            mealDate: mealDateNorm,
+            paymentStatus: { not: "REEMBOLSADO" },
+          },
+        });
+        if (sold >= type.maxQuantity) {
+          throw new Error("No hay cupo disponible para este plato en la fecha seleccionada.");
         }
       }
 
@@ -326,7 +353,11 @@ export async function getAdminTickets(page = 0, pageSize = 20) {
   const [tickets, total] = await Promise.all([
     db.ticket.findMany({
       where,
-      include: { user: { select: { name: true, email: true } }, ticketType: true },
+      include: {
+        user: { select: { name: true, email: true } },
+        seller: { select: { name: true, email: true } },
+        ticketType: true,
+      },
       orderBy: { createdAt: "desc" },
       skip: page * pageSize,
       take: pageSize,
@@ -339,6 +370,8 @@ export async function getAdminTickets(page = 0, pageSize = 20) {
       id: t.id,
       userName: t.user?.name ?? t.guestName ?? "Invitado",
       userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
+      sellerName: t.seller?.name ?? null,
+      sellerEmail: t.seller?.email ?? null,
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
@@ -424,9 +457,24 @@ export async function createManualSale(input: {
 
   const type = await db.ticketType.findFirst({
     where: { id: input.ticketTypeId, active: true },
-    select: { id: true },
+    select: { id: true, maxQuantity: true },
   });
   if (!type) throw new Error("Tipo de ticket no disponible");
+
+  if (type.maxQuantity != null) {
+    const sold = await db.ticket.count({
+      where: {
+        ticketTypeId: type.id,
+        mealDate,
+        paymentStatus: { not: "REEMBOLSADO" },
+      },
+    });
+    if (sold + quantity > type.maxQuantity) {
+      throw new Error(
+        `No hay cupo. Este plato tiene un límite de ${type.maxQuantity} comidas para esa fecha; ya se vendieron ${sold}.`
+      );
+    }
+  }
 
   const now = new Date();
   const usedAt = input.markUsed ? now : null;
@@ -693,6 +741,7 @@ export async function createTicketType(formData: FormData) {
   const description = (formData.get("description") as string) || null;
   const image = (formData.get("image") as string) || null;
   const availableForDateStr = formData.get("availableForDate") as string;
+  const maxQuantityStr = (formData.get("maxQuantity") as string)?.trim();
 
   if (!name || !price) throw new Error("Nombre y precio son requeridos");
 
@@ -707,6 +756,8 @@ export async function createTicketType(formData: FormData) {
     }
   }
 
+  const maxQuantity = maxQuantityStr && /^\d+$/.test(maxQuantityStr) ? Math.max(1, parseInt(maxQuantityStr, 10)) : null;
+
   await db.ticketType.create({
     data: {
       name: name.trim(),
@@ -716,6 +767,7 @@ export async function createTicketType(formData: FormData) {
       description: description?.trim() || null,
       image,
       availableForDate,
+      maxQuantity,
     },
   });
   revalidatePath("/admin");
@@ -739,6 +791,7 @@ export async function updateTicketType(id: string, formData: FormData) {
   const image = (formData.get("image") as string) || null;
   const availableForDateStr = formData.get("availableForDate") as string;
   const active = formData.get("active") === "true";
+  const maxQuantityStr = (formData.get("maxQuantity") as string)?.trim();
 
   if (!name) throw new Error("El nombre es requerido");
 
@@ -752,6 +805,7 @@ export async function updateTicketType(id: string, formData: FormData) {
   }
 
   const price = priceStr ? parseFloat(priceStr) : Number(existing.price);
+  const maxQuantity = maxQuantityStr && /^\d+$/.test(maxQuantityStr) ? Math.max(1, parseInt(maxQuantityStr, 10)) : null;
 
   await db.ticketType.update({
     where: { id },
@@ -763,6 +817,7 @@ export async function updateTicketType(id: string, formData: FormData) {
       description,
       image,
       availableForDate,
+      maxQuantity,
       active,
     },
   });
