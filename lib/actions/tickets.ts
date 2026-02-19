@@ -532,7 +532,7 @@ export async function createManualSale(input: {
       ticketTypeId: type.id,
       mealDate,
       usedAt,
-      paymentStatus: "PAGADO",
+      paymentStatus: "PENDIENTE",
       sellerId: current.id,
       paymentReference,
       paymentBank,
