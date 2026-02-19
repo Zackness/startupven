@@ -106,6 +106,7 @@ export default async function VendedorTicketsPage({
             <thead className="border-b border-zinc-200 bg-zinc-50">
               <tr>
                 <th className="px-4 py-3 font-medium text-black">Usuario</th>
+                <th className="px-4 py-3 font-medium text-black">Origen</th>
                 <th className="px-4 py-3 font-medium text-black">C.I.</th>
                 <th className="px-4 py-3 font-medium text-black">Expediente</th>
                 <th className="px-4 py-3 font-medium text-black">Tipo</th>
@@ -124,6 +125,17 @@ export default async function VendedorTicketsPage({
                       <p className="font-medium text-black">{t.userName}</p>
                       <p className="text-xs text-zinc-600">{t.userEmail}</p>
                     </td>
+                    <td className="px-4 py-3">
+                      {t.isWebPurchase ? (
+                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700">
+                          Compra web
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                          Venta manual
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-zinc-700">{t.userCedula ?? "—"}</td>
                     <td className="px-4 py-3 text-zinc-700">{t.userExpediente ?? "—"}</td>
                     <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
@@ -136,6 +148,10 @@ export default async function VendedorTicketsPage({
                       ) : isCancelled ? (
                         <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
                           Cancelado
+                        </span>
+                      ) : t.paymentStatus === "PAGADO" ? (
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                          Comprado
                         </span>
                       ) : (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">

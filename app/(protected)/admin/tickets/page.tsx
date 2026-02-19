@@ -109,7 +109,9 @@ export default async function AdminTicketsPage({
                             <span className="text-xs text-zinc-600">{t.sellerEmail ?? ""}</span>
                           </div>
                         ) : (
-                          <span className="text-zinc-400">—</span>
+                          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700">
+                            Compra web
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>

@@ -77,28 +77,37 @@ export function BarChart(props: {
         </span>
       </div>
 
-      <div className="mt-4 flex h-44 items-end gap-2">
-        {props.data.length === 0 ? (
-          <p className="flex w-full items-center justify-center text-sm text-zinc-500">Sin datos</p>
-        ) : (
-          props.data.map((d) => {
-            const h = Math.round((d.value / max) * 100);
-            return (
-              <div key={d.label} className="flex flex-1 flex-col items-center gap-2">
-                <div className="flex w-full flex-1 items-end">
-                  <div
-                    className="w-full min-h-[2px] rounded-md bg-black/80"
-                    style={{ height: `${h}%` }}
-                    title={`${d.label}: ${d.value}`}
-                  />
+      <div className="mt-4 overflow-x-auto">
+        <div
+          className="flex h-44 min-w-0 items-end gap-1"
+          style={props.data.length > 14 ? { minWidth: props.data.length * 24 } : undefined}
+        >
+          {props.data.length === 0 ? (
+            <p className="flex w-full items-center justify-center text-sm text-zinc-500">Sin datos</p>
+          ) : (
+            props.data.map((d, i) => {
+              const h = Math.round((d.value / max) * 100);
+              const step = props.data.length <= 14 ? 1 : Math.max(1, Math.floor(props.data.length / 14));
+              const showLabel = i % step === 0 || i === props.data.length - 1;
+              return (
+                <div key={`${d.label}-${i}`} className="flex min-w-[20px] flex-1 flex-col items-center gap-1">
+                  <div className="flex w-full flex-1 items-end">
+                    <div
+                      className="w-full min-h-[2px] rounded-md bg-black/80"
+                      style={{ height: `${h}%` }}
+                      title={`${d.label}: ${d.value}`}
+                    />
+                  </div>
+                  {showLabel && (
+                    <div className="text-center text-[10px] leading-tight text-zinc-600 truncate max-w-full">
+                      {d.label}
+                    </div>
+                  )}
                 </div>
-                <div className="text-center text-[11px] leading-tight text-zinc-600 truncate max-w-full">
-                  {d.label}
-                </div>
-              </div>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

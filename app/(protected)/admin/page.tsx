@@ -1,12 +1,29 @@
 import { getAdminStats } from "@/lib/actions/tickets";
-import Link from "next/link";
 import { ADMIN_PATH } from "@/routes";
-import { Button } from "@/components/ui/button";
-import { Ticket, CalendarDays, UtensilsCrossed } from "lucide-react";
+import { Ticket, CalendarDays, UtensilsCrossed, ShoppingCart } from "lucide-react";
 import { BarChart, PieChart } from "./admin-charts";
+import { AdminChartPeriodLinks } from "./admin-chart-period-links";
 
-export default async function AdminPage() {
+const MONTH_NAMES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+function formatChartLabel(dateStr: string) {
+  const [y, m, day] = dateStr.split("-").map(Number);
+  return `${day} ${MONTH_NAMES[m - 1]}`;
+}
+
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ grafico?: string }>;
+}) {
   const stats = await getAdminStats();
+  const grafico = (await searchParams).grafico ?? "7d";
+  const useMonth = grafico === "mes";
+
+  const chartData = useMonth ? stats.ticketsThisMonthBySale : stats.ticketsLast7DaysBySale;
+  const chartTitle = useMonth
+    ? "Ventas por día (este mes)"
+    : "Ventas por día (últimos 7 días)";
 
   return (
     <div className="space-y-8">
@@ -19,49 +36,48 @@ export default async function AdminPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm ">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-zinc-100 p-2">
               <Ticket className="h-6 w-6 text-black" />
             </div>
             <div>
-              <p className="text-sm font-medium text-zinc-600">
-                Total tickets
-              </p>
-              <p className="text-2xl font-bold text-black">
-                {stats.totalTickets}
-              </p>
+              <p className="text-sm font-medium text-zinc-600">Total tickets</p>
+              <p className="text-2xl font-bold text-black">{stats.totalTickets}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm ">
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-green-100 p-2">
+              <ShoppingCart className="h-6 w-6 text-green-700" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-zinc-600">Ventas hoy</p>
+              <p className="text-2xl font-bold text-black">{stats.salesToday}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-amber-100 p-2">
               <CalendarDays className="h-6 w-6 text-amber-700" />
             </div>
             <div>
-              <p className="text-sm font-medium text-zinc-600">
-                Tickets hoy
-              </p>
-              <p className="text-2xl font-bold text-black">
-                {stats.ticketsToday}
-              </p>
+              <p className="text-sm font-medium text-zinc-600">Tickets menú hoy</p>
+              <p className="text-2xl font-bold text-black">{stats.ticketsTodayMenu}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm ">
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-green-500/10 p-2">
-              <UtensilsCrossed className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="rounded-lg bg-blue-100 p-2">
+              <UtensilsCrossed className="h-6 w-6 text-blue-700" />
             </div>
             <div>
-              <p className="text-sm font-medium text-zinc-600">
-                Platos
-              </p>
-              <p className="text-2xl font-bold text-black">
-                {stats.ticketTypesCount}
-              </p>
+              <p className="text-sm font-medium text-zinc-600">Platos activos</p>
+              <p className="text-2xl font-bold text-black">{stats.ticketTypesCount}</p>
             </div>
           </div>
         </div>
@@ -83,26 +99,25 @@ export default async function AdminPage() {
         <PieChart
           title="Estado de tickets"
           data={[
-            { label: "Pendiente", value: stats.ticketsPendingPayment, color: "#f59e0b" }, // Amber-500
-            { label: "Canjeado", value: stats.ticketsRedeemed, color: "#16a34a" }, // Green-600
-            { label: "Vencido", value: stats.ticketsExpired, color: "#dc2626" }, // Red-600
-            { label: "Disponible", value: stats.ticketsAvailable, color: "#2563eb" }, // Blue-600
+            { label: "Pendiente pago", value: stats.ticketsPendingPayment, color: "#f59e0b" },
+            { label: "Canjeado", value: stats.ticketsRedeemed, color: "#16a34a" },
+            { label: "Vencido", value: stats.ticketsExpired, color: "#dc2626" },
+            { label: "Disponible", value: stats.ticketsAvailable, color: "#2563eb" },
           ]}
           className="lg:col-span-1"
         />
 
-        <BarChart
-          title="Tickets por fecha menú (últimos 7 días)"
-          data={stats.ticketsLast7Days.map((d) => {
-            const [y, m, day] = d.date.split("-").map(Number);
-            const shortMonth = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][m - 1];
-            return {
-              label: `${day} ${shortMonth}`,
+        <div className="lg:col-span-1 space-y-2">
+          <AdminChartPeriodLinks current={grafico} />
+          <BarChart
+            title={chartTitle}
+            data={chartData.map((d) => ({
+              label: formatChartLabel(d.date),
               value: d.count,
-            };
-          })}
-          className="lg:col-span-1"
-        />
+            }))}
+            className="w-full"
+          />
+        </div>
       </div>
     </div>
   );

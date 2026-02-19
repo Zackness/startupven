@@ -262,12 +262,17 @@ export async function getAdminStats() {
     todayStart.getUTCDate(),
     23, 59, 59, 999
   ));
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setUTCDate(tomorrowStart.getUTCDate() + 1);
   const last7Start = new Date(todayStart);
   last7Start.setUTCDate(last7Start.getUTCDate() - 6);
+  const monthStart = new Date(Date.UTC(todayStart.getUTCFullYear(), todayStart.getUTCMonth(), 1, 0, 0, 0, 0));
+  const nextMonthStart = new Date(Date.UTC(todayStart.getUTCFullYear(), todayStart.getUTCMonth() + 1, 1, 0, 0, 0, 0));
 
   const [
     totalTickets,
-    ticketsToday,
+    ticketsTodayMenu,
+    salesToday,
     ticketTypesCount,
     totalUsers,
     usersByRoleRaw,
@@ -276,14 +281,18 @@ export async function getAdminStats() {
     ticketsExpired,
     ticketsAvailable,
     ticketsByDayRaw,
+    salesLast7Rows,
+    salesMonthRows,
   ] = await Promise.all([
     db.ticket.count(),
     db.ticket.count({
       where: {
-        mealDate: {
-          gte: todayStart,
-          lt: todayEnd,
-        },
+        mealDate: { gte: todayStart, lt: tomorrowStart },
+      },
+    }),
+    db.ticket.count({
+      where: {
+        createdAt: { gte: todayStart, lte: todayEnd },
       },
     }),
     db.ticketType.count({ where: { active: true } }),
@@ -311,26 +320,57 @@ export async function getAdminStats() {
     }),
     db.ticket.groupBy({
       by: ["mealDate"],
-      where: { mealDate: { gte: last7Start, lt: todayEnd } },
+      where: { mealDate: { gte: last7Start, lt: tomorrowStart } },
       _count: { _all: true },
       orderBy: { mealDate: "asc" },
     }),
+    db.ticket.findMany({
+      where: { createdAt: { gte: last7Start, lt: tomorrowStart } },
+      select: { createdAt: true },
+    }),
+    db.ticket.findMany({
+      where: { createdAt: { gte: monthStart, lt: nextMonthStart } },
+      select: { createdAt: true },
+    }),
   ]);
 
-  // Normalizar días (últimos 7) para que el gráfico no tenga huecos
+  function groupBySaleDate(rows: { createdAt: Date }[], start: Date, length: number): { date: string; count: number }[] {
+    const map = new Map<string, number>();
+    for (const r of rows) {
+      const key = r.createdAt.toISOString().slice(0, 10);
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return Array.from({ length }, (_, i) => {
+      const d = new Date(start);
+      d.setUTCDate(d.getUTCDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      return { date: key, count: map.get(key) ?? 0 };
+    });
+  }
+
+  const daysInMonth = new Date(Date.UTC(todayStart.getUTCFullYear(), todayStart.getUTCMonth() + 1, 0)).getUTCDate();
+
+  const ticketsLast7DaysBySale = groupBySaleDate(salesLast7Rows, last7Start, 7);
+  const ticketsThisMonthBySale = groupBySaleDate(
+    salesMonthRows,
+    monthStart,
+    daysInMonth
+  );
+
   const ticketsByDayMap = new Map<string, number>(
     ticketsByDayRaw.map((r) => [r.mealDate.toISOString().slice(0, 10), r._count._all])
   );
-  const ticketsLast7Days = Array.from({ length: 7 }).map((_, i) => {
+  const ticketsLast7DaysByMenu = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(last7Start);
-    d.setDate(last7Start.getDate() + i);
+    d.setUTCDate(d.getUTCDate() + i);
     const key = d.toISOString().slice(0, 10);
     return { date: key, count: ticketsByDayMap.get(key) ?? 0 };
   });
 
   return {
     totalTickets,
-    ticketsToday,
+    ticketsTodayMenu,
+    salesToday,
     ticketTypesCount,
     totalUsers,
     usersByRole: usersByRoleRaw.map((r) => ({ role: r.role, count: r._count._all })),
@@ -338,7 +378,9 @@ export async function getAdminStats() {
     ticketsRedeemed,
     ticketsExpired,
     ticketsAvailable,
-    ticketsLast7Days,
+    ticketsLast7DaysByMenu,
+    ticketsLast7DaysBySale,
+    ticketsThisMonthBySale,
   };
 }
 
@@ -543,7 +585,11 @@ export async function getAdminTicketsFiltered(
   const [tickets, total] = await Promise.all([
     db.ticket.findMany({
       where,
-      include: { user: { select: { name: true, email: true } }, ticketType: true },
+      include: {
+        user: { select: { name: true, email: true } },
+        seller: { select: { name: true, email: true } },
+        ticketType: true,
+      },
       orderBy: { createdAt: "desc" },
       skip: page * pageSize,
       take: pageSize,
@@ -556,6 +602,8 @@ export async function getAdminTicketsFiltered(
       id: t.id,
       userName: t.user?.name ?? t.guestName ?? "Invitado",
       userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
+      sellerName: t.seller?.name ?? null,
+      sellerEmail: t.seller?.email ?? null,
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
@@ -581,7 +629,7 @@ export async function getVendorTicketsFiltered(
   const current = session.user as unknown as { id: string };
 
   const where: Prisma.TicketWhereInput = {
-    sellerId: current.id,
+    OR: [{ sellerId: current.id }, { sellerId: null }],
   };
 
   if (filters?.fecha) {
@@ -625,8 +673,10 @@ export async function getVendorTicketsFiltered(
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,
+      paymentStatus: t.paymentStatus,
       paymentReference: t.paymentReference,
       paymentBank: t.paymentBank,
+      isWebPurchase: t.sellerId === null,
     })),
     total,
   };

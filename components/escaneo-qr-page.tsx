@@ -3,18 +3,23 @@
 import { useState, useCallback } from "react";
 import { QRScanner } from "@/components/qr-scanner";
 import { ScanResultPanel, type TicketScanInfo } from "@/components/scan-result-panel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { getTicketByIdForScan, markTicketUsed } from "@/lib/actions/tickets";
 import { getTodayStartUTC } from "@/lib/utils";
 import { toast } from "sonner";
+import { CheckCircle2 } from "lucide-react";
 
 export function EscaneoQRPage() {
   const [ticket, setTicket] = useState<TicketScanInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const handleResult = useCallback(async (ticketId: string) => {
     setError(null);
     setLoading(true);
+    setShowSuccessDialog(false);
     try {
       const data = await getTicketByIdForScan(ticketId);
       if (!data) {
@@ -54,6 +59,7 @@ export function EscaneoQRPage() {
           toast.success("Ticket leído", { duration: 3000 });
         }
       }
+      setShowSuccessDialog(true);
     } catch {
       setTicket(null);
       setError("Error al consultar el ticket.");
@@ -65,6 +71,35 @@ export function EscaneoQRPage() {
 
   return (
     <div className="space-y-6">
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent
+          className="max-w-md sm:max-w-lg border-zinc-200 bg-white p-8 text-center"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-black sm:text-3xl">
+              Escaneado con éxito
+            </DialogTitle>
+            <p className="mt-2 text-zinc-600">
+              El ticket fue procesado correctamente. Revisa el panel de resultado si necesitas más detalles.
+            </p>
+          </DialogHeader>
+          <div className="mt-6">
+            <Button
+              size="lg"
+              className="w-full bg-black text-white hover:bg-zinc-800 sm:w-auto sm:min-w-[180px]"
+              onClick={() => setShowSuccessDialog(false)}
+            >
+              Aceptar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
           <h2 className="mb-2 text-lg font-semibold text-black">Cámara</h2>
