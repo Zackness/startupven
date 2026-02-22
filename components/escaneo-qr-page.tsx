@@ -15,6 +15,8 @@ export function EscaneoQRPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  /** Si es true, al hacer clic en Aceptar se canjea el ticket (no se canjea al escanear). */
+  const [canRedeemOnAccept, setCanRedeemOnAccept] = useState(false);
 
   const handleResult = useCallback(async (ticketId: string) => {
     setError(null);
@@ -32,7 +34,7 @@ export function EscaneoQRPage() {
       const usedAt = data.usedAt ? new Date(data.usedAt) : null;
       const todayStart = getTodayStartUTC();
       const isExpired = !usedAt && mealDate < todayStart;
-      const canAutoMark =
+      const canRedeem =
         data.paymentStatus === "PAGADO" && !usedAt && !isExpired;
 
       const ticketInfo: TicketScanInfo = {
@@ -41,25 +43,14 @@ export function EscaneoQRPage() {
         usedAt,
       };
 
-      if (canAutoMark) {
-        await markTicketUsed(data.id);
-        setTicket({ ...ticketInfo, usedAt: new Date() });
-        toast.success("¡Escaneo exitoso!", {
-          description: "El ticket fue canjeado correctamente. El cliente verá la actualización en su pantalla.",
-          duration: 4500,
-        });
-      } else {
-        setTicket(ticketInfo);
-        if (usedAt) {
-          toast.success("¡Escaneo exitoso!", {
-            description: "Este ticket ya estaba canjeado.",
-            duration: 4000,
-          });
-        } else {
-          toast.success("Ticket leído", { duration: 3000 });
-        }
-      }
+      setTicket(ticketInfo);
+      setCanRedeemOnAccept(canRedeem);
       setShowSuccessDialog(true);
+      if (!canRedeem) {
+        if (usedAt) toast.info("Este ticket ya estaba canjeado.", { duration: 4000 });
+        else if (isExpired) toast.info("Ticket vencido.", { duration: 4000 });
+        else toast.info("Ticket leído.", { duration: 3000 });
+      }
     } catch {
       setTicket(null);
       setError("Error al consultar el ticket.");
@@ -69,11 +60,33 @@ export function EscaneoQRPage() {
     }
   }, []);
 
+  const handleAccept = useCallback(async () => {
+    if (!ticket) {
+      setShowSuccessDialog(false);
+      return;
+    }
+    if (canRedeemOnAccept) {
+      try {
+        await markTicketUsed(ticket.id);
+        setTicket((prev) => (prev ? { ...prev, usedAt: new Date() } : null));
+        setCanRedeemOnAccept(false);
+        toast.success("Ticket canjeado correctamente.", {
+          description: "El cliente verá la actualización en su pantalla.",
+          duration: 4500,
+        });
+      } catch {
+        toast.error("No se pudo canjear el ticket.");
+        return;
+      }
+    }
+    setShowSuccessDialog(false);
+  }, [ticket, canRedeemOnAccept]);
+
   return (
     <div className="space-y-6">
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent
-          className="max-w-md sm:max-w-lg border-zinc-200 bg-white p-8 text-center"
+          className="max-w-md sm:max-w-lg border-zinc-200 bg-white p-6 text-center sm:p-8"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -85,14 +98,21 @@ export function EscaneoQRPage() {
               Escaneado con éxito
             </DialogTitle>
             <p className="mt-2 text-zinc-600">
-              El ticket fue procesado correctamente. Revisa el panel de resultado si necesitas más detalles.
+              {canRedeemOnAccept
+                ? "Revisa los datos y pulsa Aceptar para canjear el ticket."
+                : "Datos del ticket. No se puede canjear (ya usado, vencido o pendiente de pago)."}
             </p>
           </DialogHeader>
+          {ticket && (
+            <div className="mt-4 text-left">
+              <ScanResultPanel ticket={ticket} />
+            </div>
+          )}
           <div className="mt-6">
             <Button
               size="lg"
               className="w-full bg-black text-white hover:bg-zinc-800 sm:w-auto sm:min-w-[180px]"
-              onClick={() => setShowSuccessDialog(false)}
+              onClick={handleAccept}
             >
               Aceptar
             </Button>
@@ -120,7 +140,7 @@ export function EscaneoQRPage() {
         <div>
           <h2 className="mb-2 text-lg font-semibold text-black">Resultado</h2>
           <p className="mb-3 text-sm text-zinc-600">
-            Un escaneo marca el ticket como canjeado. No se puede canjear dos veces.
+            Al escanear se abre un diálogo con los datos. El ticket se canjea solo al pulsar Aceptar en ese diálogo.
           </p>
           {ticket ? (
             <ScanResultPanel ticket={ticket} />
