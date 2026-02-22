@@ -23,7 +23,7 @@ export default async function VendedorLayout({ children }: { children: React.Rea
       nav={<VendedorSidebar showAdminLink={user.role === "ADMIN"} />}
       headerRight={
         <>
-          <span className="hidden text-sm text-zinc-600 sm:inline">{session.user.name}</span>
+          <span className="hidden text-sm text-[var(--muted-foreground)] sm:inline">{session.user.name}</span>
           <UserButton />
         </>
       }

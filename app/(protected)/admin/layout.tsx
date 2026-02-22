@@ -29,7 +29,7 @@ export default async function AdminLayout({
       nav={<AdminSidebar isEditor={isEditor} />}
       headerRight={
         <>
-          <span className="hidden text-sm text-zinc-600 sm:inline">
+          <span className="hidden text-sm text-[var(--muted-foreground)] sm:inline">
             {session.user.name} ({isEditor ? "Editor" : "Admin"})
           </span>
           <UserButton />

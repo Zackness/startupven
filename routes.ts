@@ -22,6 +22,8 @@ export const publicRoutes = [
     "/blog",
     "/blog/.*",      // Patrones dinámicos
     "/politica-de-privacidad",
+    "/privacidad",
+    "/aviso-legal",
     "/terminos-de-servicio",
     "/cookies",
 ];
@@ -33,6 +35,7 @@ export const publicRoutes = [
  */
 export const authRoutes = [
     "/login",
+    "/register",
     "/error",
     "/reset",
     "/new-password",

@@ -22,7 +22,7 @@ export default async function EscritorioLayout({
       nav={<EscritorioSidebar role={role} />}
       headerRight={
         <>
-          <span className="hidden text-sm text-zinc-600 sm:inline">{session.user.name}</span>
+          <span className="hidden text-sm text-[var(--muted-foreground)] sm:inline">{session.user.name}</span>
           <UserButton />
         </>
       }

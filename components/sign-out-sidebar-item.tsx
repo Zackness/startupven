@@ -13,8 +13,8 @@ type Props = {
 
 export function SignOutSidebarItem({
   className,
-  activeClassName = "bg-blue-800 text-white",
-  inactiveClassName = "text-zinc-700 hover:bg-zinc-100 hover:text-black",
+  activeClassName = "bg-[var(--primary)] text-[var(--primary-foreground)]",
+  inactiveClassName = "text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--foreground)]",
 }: Props) {
   const [isPending, startTransition] = useTransition();
 

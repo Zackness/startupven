@@ -65,9 +65,9 @@ export const RegisterForm = () => {
     }
 
   return (
-    <CardWrapper className="w-full border border-zinc-200 bg-white shadow-xl text-black">
+    <CardWrapper className="w-full shadow-xl">
       <motion.h2
-        className="mb-6 text-center text-3xl font-bold text-black sm:text-4xl"
+        className="mb-6 text-center text-3xl font-bold text-[var(--foreground)] sm:text-4xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -130,7 +130,7 @@ export const RegisterForm = () => {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-black focus:outline-none"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:outline-none"
                         >
                           {showPassword ? (
                             <EyeOff className="h-5 w-5" />
@@ -150,7 +150,7 @@ export const RegisterForm = () => {
             <Button
               type="submit"
               disabled={isPending}
-              className="h-11 w-full rounded-xl bg-black text-base font-semibold text-white hover:bg-zinc-800"
+              className="h-11 w-full rounded-xl bg-[var(--primary)] text-base font-semibold text-[var(--primary-foreground)] hover:opacity-90"
             >
               Registrarse
             </Button>
@@ -158,11 +158,11 @@ export const RegisterForm = () => {
         </Form>
       </div>
       <div className="mt-6 text-center">
-        <div className="text-sm text-zinc-600">
+        <div className="text-sm text-[var(--muted-foreground)]">
           ¿Ya tienes una cuenta?{" "}
           <Link
             href="/login"
-            className="font-semibold text-black underline underline-offset-2 hover:no-underline"
+            className="font-semibold text-[var(--foreground)] underline underline-offset-2 hover:no-underline"
           >
             Inicia Sesión
           </Link>

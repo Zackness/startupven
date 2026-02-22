@@ -17,7 +17,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium leading-none text-black"
+            className="text-sm font-medium leading-none text-[var(--foreground)]"
           >
             {label}
           </label>

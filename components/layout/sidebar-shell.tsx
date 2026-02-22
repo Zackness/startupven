@@ -40,12 +40,12 @@ export function SidebarShell(props: {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex min-h-screen">
         <aside
           className={cn(
             "hidden shrink-0 transition-[width] duration-200 md:block",
-            desktopOpen ? "w-64 border-r border-zinc-200" : "w-0 border-r-0"
+            desktopOpen ? "w-64 border-r border-[var(--border)]" : "w-0 border-r-0"
           )}
           aria-hidden={!desktopOpen}
         >
@@ -56,15 +56,15 @@ export function SidebarShell(props: {
             )}
           >
             <div className="mb-4">
-              <p className="text-sm font-semibold text-black">{props.title}</p>
-              {props.subtitle && <p className="text-xs text-zinc-600">{props.subtitle}</p>}
+              <p className="text-sm font-semibold text-[var(--foreground)]">{props.title}</p>
+              {props.subtitle && <p className="text-xs text-[var(--muted-foreground)]">{props.subtitle}</p>}
             </div>
             {props.nav}
           </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white">
+          <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--background)]">
             <div className={cn("mx-auto flex h-14 items-center justify-between gap-3 px-4", props.maxWidthClass)}>
               <div className="flex items-center gap-2">
                 {/* Mobile menu */}

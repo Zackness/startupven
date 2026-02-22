@@ -10,13 +10,13 @@ export const CardWrapper = ({ headerLabel, children, className, ...props }: Card
   return (
     <div
       className={cn(
-        "w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-lg",
+        "w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg text-[var(--card-foreground)]",
         className
       )}
       {...props}
     >
       {headerLabel && (
-        <h1 className="text-2xl font-semibold text-center text-black mb-6">
+        <h1 className="text-2xl font-semibold text-center text-[var(--foreground)] mb-6">
           {headerLabel}
         </h1>
       )}

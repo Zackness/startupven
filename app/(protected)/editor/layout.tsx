@@ -23,7 +23,7 @@ export default async function EditorLayout({ children }: { children: React.React
       nav={<EditorSidebar />}
       headerRight={
         <>
-          <span className="hidden text-sm text-zinc-600 sm:inline">{session.user.name}</span>
+          <span className="hidden text-sm text-[var(--muted-foreground)] sm:inline">{session.user.name}</span>
           <UserButton />
         </>
       }

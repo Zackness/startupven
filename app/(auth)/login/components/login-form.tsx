@@ -67,7 +67,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <CardWrapper className="w-full border border-zinc-200 bg-white shadow-xl text-black">
+    <CardWrapper className="w-full shadow-xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
@@ -106,7 +106,7 @@ export const LoginForm = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 focus:outline-none"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:outline-none"
                       >
                         {showPassword ? (
                           <EyeOff className="h-5 w-5" />
@@ -126,10 +126,10 @@ export const LoginForm = () => {
               render={({ field }: { field: ControllerRenderProps<z.infer<typeof LoginSchema>, "rememberMe"> }) => (
                 <FormItem>
                   <FormControl>
-                    <label className="flex items-center gap-2 text-sm text-zinc-700">
+                    <label className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-zinc-300"
+                        className="h-4 w-4 rounded border-[var(--border)]"
                         checked={!!field.value}
                         onChange={(e) => field.onChange(e.target.checked)}
                         disabled={isPending}
@@ -146,14 +146,20 @@ export const LoginForm = () => {
           <Button
             disabled={isPending}
             type="submit"
-            className="h-11 w-full rounded-xl bg-black text-base font-semibold text-white hover:bg-zinc-800"
+            className="h-11 w-full rounded-xl bg-[var(--primary)] text-base font-semibold text-[var(--primary-foreground)] hover:opacity-90"
           >
             Iniciar Sesión
           </Button>
-          <div className="space-y-4 text-center">
+          <div className="space-y-3 text-center">
+            <Link
+              href="/register"
+              className="block text-sm text-[var(--muted-foreground)] underline underline-offset-2 hover:text-[var(--foreground)]"
+            >
+              ¿No tienes cuenta? Regístrate
+            </Link>
             <Link
               href="/reset"
-              className="text-sm text-zinc-600 underline underline-offset-2 hover:text-black"
+              className="block text-sm text-[var(--muted-foreground)] underline underline-offset-2 hover:text-[var(--foreground)]"
             >
               ¿Olvidaste tu contraseña?
             </Link>

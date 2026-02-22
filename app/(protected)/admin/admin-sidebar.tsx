@@ -50,8 +50,8 @@ export function AdminSidebar({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-blue-800 text-white"
-                  : "text-zinc-700 hover:bg-zinc-100 hover:text-black"
+                  ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+                  : "text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--foreground)]"
               )}
             >
               <Icon className="h-4 w-4" />
@@ -60,8 +60,8 @@ export function AdminSidebar({
           );
         })}
       </div>
-      <div className="mt-auto border-t border-zinc-200 pt-3">
-        <SignOutSidebarItem inactiveClassName="text-zinc-700 hover:bg-zinc-100 hover:text-black" />
+      <div className="mt-auto border-t border-[var(--border)] pt-3">
+        <SignOutSidebarItem inactiveClassName="text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--foreground)]" />
       </div>
     </nav>
   );

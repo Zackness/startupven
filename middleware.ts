@@ -27,10 +27,6 @@ export default async function middleware(req: NextRequest) {
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.some((route) => new RegExp(`^${route}$`).test(nextUrl.pathname));
-  // Registro oculto: redirigir a login (no se permite autoregistro)
-  if (nextUrl.pathname === "/register") {
-    return NextResponse.redirect(new URL("/login", nextUrl));
-  }
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isAdminRoute = nextUrl.pathname === adminRoutesPrefix || nextUrl.pathname.startsWith(adminRoutesPrefix + "/");
   const isVendorRoute =
