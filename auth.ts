@@ -19,6 +19,12 @@ function isBcryptHash(hash: string) {
  */
 export const auth = betterAuth({
   plugins: [nextCookies()],
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+  ],
   database: prismaAdapter(db, { provider: "mysql" }),
   // Sesiones más largas (sliding sessions): se renuevan mientras el usuario use la app.
   // Unidades en segundos.

@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, QrCode, Ticket, UtensilsCrossed, Users } from "lucide-react";
+import { Home, LayoutDashboard, ClipboardList, QrCode, ShoppingCart, Ticket, UtensilsCrossed, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ADMIN_PATH, EDITOR_PATH, ESCRITORIO_PATH } from "@/routes";
+import { ADMIN_PATH, EDITOR_PATH, ESCRITORIO_PATH, VENDEDOR_PATH } from "@/routes";
 import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
 const adminItems = [
   { href: ADMIN_PATH, label: "Panel", icon: LayoutDashboard },
   { href: `${ADMIN_PATH}/tickets`, label: "Tickets", icon: Ticket },
+  { href: VENDEDOR_PATH, label: "Vender", icon: ShoppingCart },
+  { href: `${ADMIN_PATH}/ventas-pendientes`, label: "Ventas pendientes", icon: ClipboardList },
   { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
   { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
   { href: `${ADMIN_PATH}/usuarios`, label: "Usuarios", icon: Users },

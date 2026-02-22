@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { createManualSale, type ManualSaleBuyer } from "@/lib/actions/tickets";
+import { createAdminManualSale, type ManualSaleBuyer } from "@/lib/actions/tickets";
 
 export type ManualSaleUser = {
   id: string;
@@ -38,6 +38,7 @@ export type ManualSaleUser = {
 export type ManualSaleType = {
   id: string;
   name: string;
+  active?: boolean;
 };
 
 type BuyerRow =
@@ -48,15 +49,13 @@ function nextId() {
   return `row-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSaleType[] }) {
+export function AdminVentasPendientesForm(props: { users: ManualSaleUser[]; types: ManualSaleType[] }) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | undefined>("");
   const [success, setSuccess] = React.useState<string | undefined>("");
 
-  const [buyers, setBuyers] = React.useState<BuyerRow[]>([
-    { id: nextId(), type: "user", userId: "" },
-  ]);
+  const [buyers, setBuyers] = React.useState<BuyerRow[]>([{ id: nextId(), type: "user", userId: "" }]);
   const [ticketTypeId, setTicketTypeId] = React.useState<string>("");
   const [mealDate, setMealDate] = React.useState<string>(() => {
     const d = new Date();
@@ -98,9 +97,7 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
 
   function updateBuyerGuest(id: string, guestName: string, guestInstitution: string) {
     setBuyers((prev) =>
-      prev.map((r) =>
-        r.id === id && r.type === "guest" ? { ...r, guestName, guestInstitution } : r
-      )
+      prev.map((r) => (r.id === id && r.type === "guest" ? { ...r, guestName, guestInstitution } : r))
     );
   }
 
@@ -120,7 +117,7 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
       return !b.guestName.trim() || !b.guestInstitution.trim();
     });
     if (invalid.length > 0) {
-      setError("Completa o elimina las filas vacías. Cada comprador debe tener usuario o datos de invitado.");
+      setError("Completa o elimina las filas vacías.");
       return;
     }
     if (!ticketTypeId) {
@@ -137,7 +134,9 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
         return b.guestName.trim() !== "" && b.guestInstitution.trim() !== "";
       })
       .map((b) =>
-        b.type === "user" ? { userId: b.userId } : { guestName: b.guestName, guestInstitution: b.guestInstitution }
+        b.type === "user"
+          ? { userId: b.userId }
+          : { guestName: b.guestName, guestInstitution: b.guestInstitution }
       );
   }
 
@@ -149,14 +148,14 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
           setError("Agrega al menos un comprador.");
           return;
         }
-        await createManualSale({
+        await createAdminManualSale({
           buyers: payload,
           ticketTypeId,
           mealDateYmd: mealDate,
           paymentBank: paymentBank.trim() || undefined,
           paymentReference: paymentReference.trim() || undefined,
         });
-        setSuccess(`Venta registrada: ${payload.length} ticket(s).`);
+        setSuccess(`Registro guardado: ${payload.length} ticket(s).`);
         setConfirmOpen(false);
         setBuyers([{ id: nextId(), type: "user", userId: "" }]);
         setTicketTypeId("");
@@ -164,7 +163,7 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
         setPaymentReference("");
         router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "No se pudo registrar la venta");
+        setError(err instanceof Error ? err.message : "No se pudo registrar.");
       }
     });
   }
@@ -172,9 +171,9 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-black">Venta manual</h2>
+        <h2 className="text-lg font-semibold text-black">Registro de ventas pendientes</h2>
         <p className="mt-1 text-sm text-zinc-600">
-          Mismo plato, fecha, banco y referencia para todos. Agrega los compradores (uno por ticket).
+          Solo administrador. Puedes elegir cualquier plato (incluso inactivo) y cualquier fecha (incl. vencidas). Los tickets no se marcan como cancelados.
         </p>
       </div>
 
@@ -238,7 +237,9 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
                           className="w-full justify-between border-zinc-300 bg-white text-black hover:bg-zinc-50 text-sm"
                         >
                           <span className="truncate text-left">
-                            {row.userId ? props.users.find((u) => u.id === row.userId)?.label ?? "Usuario" : "Seleccionar"}
+                            {row.userId
+                              ? props.users.find((u) => u.id === row.userId)?.label ?? "Usuario"
+                              : "Seleccionar"}
                           </span>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -321,6 +322,7 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
               {props.types.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}
+                  {t.active === false ? " (inactivo)" : ""}
                 </option>
               ))}
             </select>
@@ -328,7 +330,13 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-black">Fecha menú</label>
-            <Input type="date" value={mealDate} onChange={(e) => setMealDate(e.target.value)} disabled={isPending} />
+            <Input
+              type="date"
+              value={mealDate}
+              onChange={(e) => setMealDate(e.target.value)}
+              disabled={isPending}
+            />
+            <p className="text-xs text-zinc-500">Puedes elegir fechas pasadas (para correcciones).</p>
           </div>
 
           <div className="space-y-2">
@@ -381,8 +389,10 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="border-zinc-200 bg-white text-black sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmar venta</DialogTitle>
-            <DialogDescription>Se crearán tantos tickets como compradores. Mismo plato, fecha, banco y referencia.</DialogDescription>
+            <DialogTitle>Confirmar registro</DialogTitle>
+            <DialogDescription>
+              Se crearán tantos tickets como compradores. Mismo plato, fecha, banco y referencia. No se aplica restricción de fecha ni plato activo.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-2 text-sm">
             <p>
@@ -417,7 +427,7 @@ export function ManualSaleForm(props: { users: ManualSaleUser[]; types: ManualSa
               Cancelar
             </Button>
             <Button type="button" onClick={handleConfirmSale} disabled={isPending} className="bg-black text-white hover:bg-zinc-800">
-              {isPending ? "Registrando..." : "Confirmar venta"}
+              {isPending ? "Registrando..." : "Confirmar"}
             </Button>
           </DialogFooter>
         </DialogContent>

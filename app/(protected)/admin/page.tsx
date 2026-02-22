@@ -1,29 +1,9 @@
 import { getAdminStats } from "@/lib/actions/tickets";
-import { ADMIN_PATH } from "@/routes";
 import { Ticket, CalendarDays, UtensilsCrossed, ShoppingCart } from "lucide-react";
-import { BarChart, PieChart } from "./admin-charts";
-import { AdminChartPeriodLinks } from "./admin-chart-period-links";
+import { PieChart } from "./admin-charts";
 
-const MONTH_NAMES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-
-function formatChartLabel(dateStr: string) {
-  const [y, m, day] = dateStr.split("-").map(Number);
-  return `${day} ${MONTH_NAMES[m - 1]}`;
-}
-
-export default async function AdminPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ grafico?: string }>;
-}) {
+export default async function AdminPage() {
   const stats = await getAdminStats();
-  const grafico = (await searchParams).grafico ?? "7d";
-  const useMonth = grafico === "mes";
-
-  const chartData = useMonth ? stats.ticketsThisMonthBySale : stats.ticketsLast7DaysBySale;
-  const chartTitle = useMonth
-    ? "Ventas por día (este mes)"
-    : "Ventas por día (últimos 7 días)";
 
   return (
     <div className="space-y-8">
@@ -83,7 +63,7 @@ export default async function AdminPage({
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-zinc-600">Total usuarios</p>
           <p className="mt-1 text-3xl font-bold text-black">{stats.totalUsers}</p>
@@ -104,20 +84,7 @@ export default async function AdminPage({
             { label: "Vencido", value: stats.ticketsExpired, color: "#dc2626" },
             { label: "Disponible", value: stats.ticketsAvailable, color: "#2563eb" },
           ]}
-          className="lg:col-span-1"
         />
-
-        <div className="lg:col-span-1 space-y-2">
-          <AdminChartPeriodLinks current={grafico} />
-          <BarChart
-            title={chartTitle}
-            data={chartData.map((d) => ({
-              label: formatChartLabel(d.date),
-              value: d.count,
-            }))}
-            className="w-full"
-          />
-        </div>
       </div>
     </div>
   );

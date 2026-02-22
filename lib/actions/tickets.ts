@@ -466,13 +466,14 @@ export async function getUsersForManualSale() {
   }));
 }
 
+export type ManualSaleBuyer =
+  | { userId: string }
+  | { guestName: string; guestInstitution: string };
+
 export async function createManualSale(input: {
-  userId?: string | null;
-  guestName?: string | null;
-  guestInstitution?: string | null;
+  buyers: ManualSaleBuyer[];
   ticketTypeId: string;
   mealDateYmd: string;
-  quantity: number;
   markUsed?: boolean;
   paymentReference?: string;
   paymentBank?: string;
@@ -480,16 +481,18 @@ export async function createManualSale(input: {
   const session = await ensureVendorOrAdmin();
   const current = session.user as unknown as { id: string };
 
-  const quantity = Number.isFinite(input.quantity) ? Math.floor(input.quantity) : 1;
-  if (quantity < 1 || quantity > 50) throw new Error("La cantidad debe estar entre 1 y 50");
+  if (!input.buyers?.length) throw new Error("Agrega al menos un comprador (usuario o invitado).");
+  if (input.buyers.length > 50) throw new Error("Máximo 50 compradores por operación.");
   if (!input.ticketTypeId) throw new Error("Selecciona un tipo de ticket");
 
-  const isGuest = !input.userId?.trim();
-  if (isGuest) {
-    if (!input.guestName?.trim()) throw new Error("Indica el nombre del invitado");
-    if (!input.guestInstitution?.trim()) throw new Error("Indica la institución del invitado");
-  } else {
-    if (!input.userId) throw new Error("Selecciona un usuario o completa datos de invitado");
+  for (let i = 0; i < input.buyers.length; i++) {
+    const b = input.buyers[i];
+    if ("userId" in b) {
+      if (!b.userId?.trim()) throw new Error(`Comprador ${i + 1}: selecciona un usuario o indica invitado.`);
+    } else {
+      if (!b.guestName?.trim()) throw new Error(`Comprador ${i + 1}: indica el nombre del invitado.`);
+      if (!b.guestInstitution?.trim()) throw new Error(`Comprador ${i + 1}: indica la institución del invitado.`);
+    }
   }
 
   const mealDate = parseLocalYmd(input.mealDateYmd);
@@ -503,6 +506,7 @@ export async function createManualSale(input: {
   });
   if (!type) throw new Error("Tipo de ticket no disponible");
 
+  const quantity = input.buyers.length;
   if (type.maxQuantity != null) {
     const sold = await db.ticket.count({
       where: {
@@ -520,27 +524,116 @@ export async function createManualSale(input: {
 
   const now = new Date();
   const usedAt = input.markUsed ? now : null;
+  const paymentReference = input.paymentReference?.trim() || null;
+  const paymentBank = input.paymentBank?.trim() || null;
+
+  const ticketsData = input.buyers.map((b) =>
+    "userId" in b
+      ? {
+          userId: b.userId,
+          guestName: null as string | null,
+          guestInstitution: null as string | null,
+          ticketTypeId: type.id,
+          mealDate,
+          usedAt,
+          paymentStatus: "PENDIENTE" as const,
+          sellerId: current.id,
+          paymentReference,
+          paymentBank,
+        }
+      : {
+          userId: null as string | null,
+          guestName: b.guestName.trim(),
+          guestInstitution: b.guestInstitution.trim(),
+          ticketTypeId: type.id,
+          mealDate,
+          usedAt,
+          paymentStatus: "PENDIENTE" as const,
+          sellerId: current.id,
+          paymentReference,
+          paymentBank,
+        }
+  );
+
+  await db.ticket.createMany({ data: ticketsData });
+
+  revalidatePath("/vendedor");
+  revalidatePath("/admin/tickets");
+  revalidatePath("/escritorio/mis-tickets");
+}
+
+/** Solo ADMIN. Registra ventas sin restricción de fecha ni plato activo (para correcciones o ventas no registradas a tiempo). */
+export async function createAdminManualSale(input: {
+  buyers: ManualSaleBuyer[];
+  ticketTypeId: string;
+  mealDateYmd: string;
+  paymentReference?: string;
+  paymentBank?: string;
+}) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const user = session.user as unknown as { role?: string; id: string };
+  if (user.role !== "ADMIN") redirect("/escritorio");
+
+  if (!input.buyers?.length) throw new Error("Agrega al menos un comprador (usuario o invitado).");
+  if (input.buyers.length > 50) throw new Error("Máximo 50 compradores por operación.");
+  if (!input.ticketTypeId) throw new Error("Selecciona un tipo de ticket");
+
+  for (let i = 0; i < input.buyers.length; i++) {
+    const b = input.buyers[i];
+    if ("userId" in b) {
+      if (!b.userId?.trim()) throw new Error(`Comprador ${i + 1}: selecciona un usuario o indica invitado.`);
+    } else {
+      if (!b.guestName?.trim()) throw new Error(`Comprador ${i + 1}: indica el nombre del invitado.`);
+      if (!b.guestInstitution?.trim()) throw new Error(`Comprador ${i + 1}: indica la institución del invitado.`);
+    }
+  }
+
+  const mealDate = parseLocalYmd(input.mealDateYmd);
+  if (!mealDate) throw new Error("Fecha inválida");
+
+  const type = await db.ticketType.findFirst({
+    where: { id: input.ticketTypeId },
+    select: { id: true },
+  });
+  if (!type) throw new Error("Tipo de ticket no encontrado");
 
   const paymentReference = input.paymentReference?.trim() || null;
   const paymentBank = input.paymentBank?.trim() || null;
 
-  await db.ticket.createMany({
-    data: Array.from({ length: quantity }).map(() => ({
-      userId: isGuest ? null : input.userId,
-      guestName: isGuest ? input.guestName!.trim() : null,
-      guestInstitution: isGuest ? input.guestInstitution!.trim() : null,
-      ticketTypeId: type.id,
-      mealDate,
-      usedAt,
-      paymentStatus: "PENDIENTE",
-      sellerId: current.id,
-      paymentReference,
-      paymentBank,
-    })),
-  });
+  const ticketsData = input.buyers.map((b) =>
+    "userId" in b
+      ? {
+          userId: b.userId,
+          guestName: null as string | null,
+          guestInstitution: null as string | null,
+          ticketTypeId: type.id,
+          mealDate,
+          usedAt: null as Date | null,
+          paymentStatus: "PENDIENTE" as const,
+          sellerId: user.id,
+          paymentReference,
+          paymentBank,
+        }
+      : {
+          userId: null as string | null,
+          guestName: b.guestName.trim(),
+          guestInstitution: b.guestInstitution.trim(),
+          ticketTypeId: type.id,
+          mealDate,
+          usedAt: null as Date | null,
+          paymentStatus: "PENDIENTE" as const,
+          sellerId: user.id,
+          paymentReference,
+          paymentBank,
+        }
+  );
+
+  await db.ticket.createMany({ data: ticketsData });
 
   revalidatePath("/vendedor");
   revalidatePath("/admin/tickets");
+  revalidatePath("/admin/ventas-pendientes");
   revalidatePath("/escritorio/mis-tickets");
 }
 

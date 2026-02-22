@@ -20,7 +20,7 @@ export default async function VendedorLayout({ children }: { children: React.Rea
       title="Vendedor"
       subtitle="Comedor universitario"
       maxWidthClass="max-w-6xl"
-      nav={<VendedorSidebar />}
+      nav={<VendedorSidebar showAdminLink={user.role === "ADMIN"} />}
       headerRight={
         <>
           <span className="hidden text-sm text-zinc-600 sm:inline">{session.user.name}</span>
