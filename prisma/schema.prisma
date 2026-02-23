@@ -49,6 +49,8 @@ model User {
   balance          Decimal   @default(0) @db.Decimal(10, 2)
   requiresEmailChange    Boolean @default(false) // Obligar a cambiar si es temporal (no institucional)
   requiresPasswordChange Boolean @default(false) // Obligar a cambiar si sigue con contraseña por defecto
+  supportTickets   SupportTicket[]
+  supportTicketMessages SupportTicketMessage[]
 }
 
 // Lugar de la comida: cantina o comedor
@@ -203,6 +205,53 @@ model Verification {
   value     String
   expiresAt DateTime
   identifier String
+}
+
+/** Tickets de soporte: clientes abren y el equipo (admin/editor) responde. */
+enum SupportTicketStatus {
+  ABIERTO
+  EN_PROCESO
+  ESPERANDO_CLIENTE  // En espera de respuesta del cliente
+  RESUELTO
+  CERRADO
+}
+
+model SupportTicket {
+  id                String              @id @default(cuid())
+  userId            String
+  subject           String
+  status            SupportTicketStatus @default(ABIERTO)
+  allowClientReply  Boolean             @default(false) // Solo si el admin lo permite puede responder el cliente
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  SupportTicketMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([updatedAt])
+}
+
+/** Quién escribe el mensaje: queda registrado para saber si es cliente o equipo. */
+enum SupportTicketMessageAuthor {
+  CLIENTE
+  ADMIN
+  EDITOR
+}
+
+model SupportTicketMessage {
+  id              String                    @id @default(cuid())
+  supportTicketId String
+  userId          String
+  authorRole      SupportTicketMessageAuthor? // Registrado al escribir: cliente, admin o editor
+  body            String                    @db.Text
+  createdAt       DateTime                 @default(now())
+
+  supportTicket   SupportTicket            @relation(fields: [supportTicketId], references: [id], onDelete: Cascade)
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([supportTicketId])
 }
 
 /** Proyectos del portafolio público (web). Admin/Editor los crean; se muestran en /proyectos. */

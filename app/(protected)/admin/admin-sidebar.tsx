@@ -2,15 +2,16 @@
 
 import { Link } from "@/components/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, UtensilsCrossed, Users, FolderKanban, Settings, Cog, QrCode } from "lucide-react";
+import { Home, LayoutDashboard, UtensilsCrossed, Users, FolderKanban, Settings, Cog, QrCode, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ADMIN_PATH, EDITOR_PATH, ESCRITORIO_PATH, VENDEDOR_PATH } from "@/routes";
+import { ADMIN_PATH, ADMIN_SOPORTE_PATH, EDITOR_PATH, ESCRITORIO_PATH, VENDEDOR_PATH } from "@/routes";
 import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
 /** Admin: enfoque en plataforma (marca) y operación agrupada. */
 const adminItems = [
   { href: ADMIN_PATH, label: "Panel", icon: LayoutDashboard },
   { href: `${ADMIN_PATH}/proyectos`, label: "Proyectos web", icon: FolderKanban },
+  { href: ADMIN_SOPORTE_PATH, label: "Soporte", icon: MessageSquare },
   { href: `${ADMIN_PATH}/usuarios`, label: "Usuarios", icon: Users },
   { href: `${ADMIN_PATH}/operacion`, label: "Operación", icon: Cog },
   { href: `${ADMIN_PATH}/configuracion`, label: "Configuración", icon: Settings },
@@ -21,6 +22,7 @@ const adminItems = [
 const editorItems = [
   { href: EDITOR_PATH, label: "Panel", icon: LayoutDashboard },
   { href: `${ADMIN_PATH}/proyectos`, label: "Proyectos web", icon: FolderKanban },
+  { href: ADMIN_SOPORTE_PATH, label: "Soporte", icon: MessageSquare },
   { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
   { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
   { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },

@@ -1,5 +1,6 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { ChatbotFab } from "@/components/chatbot-fab";
 
 export default function PublicRootLayout({
   children,
@@ -12,6 +13,7 @@ export default function PublicRootLayout({
       <Header />
       <main className="relative z-10 flex-1">{children}</main>
       <Footer />
+      <ChatbotFab />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { UserButton } from "@/app/(auth)/components/user-button";
 import { EscritorioSidebar } from "./escritorio-sidebar";
 import { SidebarShell } from "@/components/layout/sidebar-shell";
+import { ChatbotFab } from "@/components/chatbot-fab";
 
 export default async function EscritorioLayout({
   children,
@@ -28,6 +29,7 @@ export default async function EscritorioLayout({
       }
     >
       {children}
+      <ChatbotFab compact />
     </SidebarShell>
   );
 }

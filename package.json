@@ -11,7 +11,8 @@
     "tipos:almuerzos": "npx tsx scripts/delete-data.ts"
   },
   "dependencies": {
-    "gsap": "^3.14.2",
+    "@ai-sdk/openai": "^3.0.30",
+    "@ai-sdk/react": "^3.0.99",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-mariadb": "^7.2.0",
     "@prisma/client": "^7.2.0",
@@ -25,6 +26,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/react-table": "^8.20.5",
+    "ai": "^6.0.97",
     "autoprefixer": "^10.4.21",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
@@ -35,6 +37,7 @@
     "cmdk": "^1.1.1",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.12",
+    "gsap": "^3.14.2",
     "lucide-react": "^0.555.0",
     "next": "15.4.8",
     "next-sitemap": "^4.2.3",

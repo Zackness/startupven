@@ -68,6 +68,9 @@ export const ESCRITORIO_TICKETS_PATH = `${ESCRITORIO_PATH}/tickets`;
  */
 export const ADMIN_PATH = "/admin";
 
+/** Tickets de soporte (clientes); admin/editor los atienden */
+export const ADMIN_SOPORTE_PATH = `${ADMIN_PATH}/soporte`;
+
 /**
  * Ruta del panel de vendedor (VENDEDOR y ADMIN)
  */
