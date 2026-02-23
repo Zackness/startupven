@@ -1,5 +1,5 @@
 import { getAdminUsers } from "@/lib/actions/users";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ADMIN_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";

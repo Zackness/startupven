@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { getProjects } from "@/lib/actions/projects";
 import { ADMIN_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";

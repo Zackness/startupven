@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { CardWrapper } from "@/components/card-wrapper";
 
 export const ErrorCard = () => {

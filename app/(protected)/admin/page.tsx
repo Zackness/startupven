@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { auth } from "@/lib/auth";
 import { getProjects } from "@/lib/actions/projects";
 import { getAdminUsers } from "@/lib/actions/users";

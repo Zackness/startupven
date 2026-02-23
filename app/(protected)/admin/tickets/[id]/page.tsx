@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ADMIN_PATH } from "@/routes";
 import { getAdminTicketTypes, getTicketForAdminEdit } from "@/lib/actions/tickets";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { EditTicketForm } from "../edit-ticket-form";

@@ -1,8 +1,11 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { BRAND_NAME } from "@/components/marca/brand";
 import { getProjectsForPublic } from "@/lib/actions/projects";
 import { ProyectoCard } from "@/components/proyecto-card";
 import { ProyectoPreviewIframe } from "@/components/proyecto-preview-iframe";
+
+// Evita prerender en build: la BD no está disponible en Vercel durante el build
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: `Proyectos | ${BRAND_NAME}`,

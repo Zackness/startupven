@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ADMIN_PATH, VENDEDOR_PATH } from "@/routes";
 import { Ticket, ShoppingCart, ClipboardList, QrCode, UtensilsCrossed, ArrowRight } from "lucide-react";
 

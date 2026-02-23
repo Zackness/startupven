@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { notFound } from "next/navigation";
 import { getProjectById } from "@/lib/actions/projects";
 import { ADMIN_PATH } from "@/routes";

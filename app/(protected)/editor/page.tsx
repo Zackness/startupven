@@ -2,7 +2,7 @@ import { getEditorTicketsFiltered } from "@/lib/actions/tickets";
 import { ApproveButton } from "@/app/(protected)/admin/tickets/approve-button";
 import { MarkUsedButton } from "@/app/(protected)/admin/tickets/mark-used-button";
 import { EditorTicketFilters } from "./editor-ticket-filters";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ESCRITORIO_PATH, EDITOR_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { getTodayStartUTC } from "@/lib/utils";

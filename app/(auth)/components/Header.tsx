@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Link } from "@/components/link";
 import { Menu, X } from 'lucide-react';
 
 const Header = () => {

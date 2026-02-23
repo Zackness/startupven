@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ADMIN_PATH } from "@/routes";
 import { ArrowLeft } from "lucide-react";
 import { EditUserForm } from "../edit-user-form";

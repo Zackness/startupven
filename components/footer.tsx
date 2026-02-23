@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
+import { BRAND_NAME, BRAND_SHORT, BRAND_TAGLINE } from "@/components/marca/brand";
 
 export function Footer() {
   return (
@@ -10,10 +11,10 @@ export function Footer() {
               href="/"
               className="text-lg font-bold tracking-tight text-[var(--foreground)] transition-opacity hover:opacity-80"
             >
-              stvn
+              {BRAND_SHORT}
             </Link>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--muted-foreground)]">
-              Alimentación sana y accesible para la comunidad universitaria.
+              {BRAND_TAGLINE}
             </p>
           </div>
           <div>
@@ -34,7 +35,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-10 border-t border-[var(--border)] pt-6 text-center text-xs text-[var(--muted-foreground)]">
-          © {new Date().getFullYear()} stvn. Todos los derechos reservados.
+          © {new Date().getFullYear()} {BRAND_NAME}. Todos los derechos reservados.
         </div>
       </div>
     </footer>

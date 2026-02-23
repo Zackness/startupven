@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/link";
 import Image from "next/image";
 import type { Proyecto } from "@/data/proyectos";
 import { ProyectoPreviewIframe } from "@/components/proyecto-preview-iframe";

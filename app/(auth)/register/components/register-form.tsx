@@ -13,7 +13,7 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { authClient } from "@/lib/better-auth-client";
 

@@ -4,7 +4,7 @@ import { ApproveButton } from "./approve-button";
 import { DeleteTicketButton } from "./delete-ticket-button";
 import { TicketFilters } from "./ticket-filters";
 import { getTodayStartUTC } from "@/lib/utils";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ADMIN_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { QrCode } from "lucide-react";

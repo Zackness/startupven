@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { BRAND_NAME } from "@/components/marca/brand";
 import { TrendingUp, Code2, Server, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";

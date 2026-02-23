@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { usePathname } from "next/navigation";
 import { Home, LayoutDashboard, UtensilsCrossed, Users, FolderKanban, Settings, Cog, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";

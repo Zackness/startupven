@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { getAdminTicketTypes } from "@/lib/actions/tickets";
 import { CreateTicketTypeForm } from "./create-ticket-type-form";
 import { ToggleActiveButton } from "./toggle-active-button";

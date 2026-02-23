@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { MOCK_TICKETS } from "../_components/escritorio-mock-data";
 import { cn } from "@/lib/utils";

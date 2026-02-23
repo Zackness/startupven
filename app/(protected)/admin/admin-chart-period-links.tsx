@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ADMIN_PATH } from "@/routes";
 import { cn } from "@/lib/utils";
 

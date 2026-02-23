@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { Wallet, ArrowRight } from "lucide-react";
 import { ESCRITORIO_PATH } from "@/routes";
 

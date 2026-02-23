@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { CardWrapper } from "@/components/card-wrapper";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { Eye, EyeOff } from "lucide-react";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { authClient } from "@/lib/better-auth-client";

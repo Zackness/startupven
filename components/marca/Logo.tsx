@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/components/link";
 
 export interface LogoProps {
   /** Ancho en píxeles. Por defecto 140 en header. */

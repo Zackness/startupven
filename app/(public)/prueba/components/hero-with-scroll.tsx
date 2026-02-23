@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { HeroMonitor } from "./hero-monitor";
 
 gsap.registerPlugin(ScrollTrigger);

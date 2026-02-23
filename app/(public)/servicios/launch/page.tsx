@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { BRAND_NAME } from "@/components/marca/brand";
 import { Rocket, Zap, Globe, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
