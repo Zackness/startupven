@@ -26,6 +26,8 @@ export const publicRoutes = [
     "/aviso-legal",
     "/terminos-de-servicio",
     "/cookies",
+    "/servicios",
+    "/servicios/.*",
 ];
 
 /**
@@ -55,6 +57,11 @@ export const apiAuthPrefix = "/api/auth";
  * Ruta del escritorio del cliente (usuario común logueado)
  */
 export const ESCRITORIO_PATH = "/escritorio";
+
+/** Rutas del escritorio STVN: proyectos, dominios, tickets de modificaciones */
+export const ESCRITORIO_PROYECTOS_PATH = `${ESCRITORIO_PATH}/proyectos`;
+export const ESCRITORIO_DOMINIOS_PATH = `${ESCRITORIO_PATH}/dominios`;
+export const ESCRITORIO_TICKETS_PATH = `${ESCRITORIO_PATH}/tickets`;
 
 /**
  * Ruta del panel de administración (solo ADMIN)
@@ -109,13 +116,10 @@ export function getLoginRedirect(role?: string | null): string {
   return ESCRITORIO_PATH;
 }
 
-/** Enums de Prisma: única fuente de verdad para roles y gremios */
-import { UserRole, Gremio } from "@/lib/generated/prisma/enums";
+/** Enums de Prisma: única fuente de verdad para roles */
+import { UserRole } from "@/lib/generated/prisma/enums";
 
 /** Roles: CLIENTE, VENDEDOR, EDITOR, ADMIN */
 export const USER_ROLES = Object.values(UserRole);
 
-/** Gremios: ESTUDIANTIL, OBRERO, PROFESORES */
-export const USER_GREMIOS = Object.values(Gremio);
-
-export type { UserRole, Gremio };
+export type { UserRole };

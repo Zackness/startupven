@@ -23,8 +23,8 @@ export default async function AdminLayout({
   return (
     <SidebarShell
       storageKey="sidebar:admin:open"
-      title={isEditor ? "Platos" : "Administración"}
-      subtitle="Comedor universitario"
+      title="STVN"
+      subtitle={isEditor ? "Editor · Contenido y operación" : "Admin · Panel de administración"}
       maxWidthClass="max-w-6xl"
       nav={<AdminSidebar isEditor={isEditor} />}
       headerRight={

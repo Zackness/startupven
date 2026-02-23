@@ -14,9 +14,9 @@ function formatDate(d: Date) {
 export default async function VendedorTicketsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; fecha?: string; cedula?: string; expediente?: string }>;
+  searchParams: Promise<{ page?: string; fecha?: string; cedula?: string }>;
 }) {
-  const { page, fecha, cedula, expediente } = await searchParams;
+  const { page, fecha, cedula } = await searchParams;
   const pageNum = Math.max(0, parseInt(page ?? "0", 10));
   const pageSize = 20;
 
@@ -29,7 +29,6 @@ export default async function VendedorTicketsPage({
   const { tickets, total } = await getVendorTicketsFiltered(pageNum, pageSize, {
     fecha: fechaYmd,
     cedula,
-    expediente,
   });
   const totalPages = Math.ceil(total / pageSize);
 
@@ -38,7 +37,6 @@ export default async function VendedorTicketsPage({
     params.set("page", String(nextPage));
     params.set("fecha", fechaYmd);
     if (cedula) params.set("cedula", cedula);
-    if (expediente) params.set("expediente", expediente);
     return `/vendedor/tickets?${params.toString()}`;
   }
 
@@ -71,16 +69,6 @@ export default async function VendedorTicketsPage({
               className="flex h-10 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-black">Expediente</label>
-            <input
-              defaultValue={expediente ?? ""}
-              name="expediente"
-              form="vendedor-filters"
-              placeholder="Ej. 2024-12345"
-              className="flex h-10 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
-            />
-          </div>
         </div>
 
         <form id="vendedor-filters" className="mt-4 flex gap-2" action="/vendedor/tickets" method="GET">
@@ -108,7 +96,6 @@ export default async function VendedorTicketsPage({
                 <th className="px-4 py-3 font-medium text-black">Usuario</th>
                 <th className="px-4 py-3 font-medium text-black">Origen</th>
                 <th className="px-4 py-3 font-medium text-black">C.I.</th>
-                <th className="px-4 py-3 font-medium text-black">Expediente</th>
                 <th className="px-4 py-3 font-medium text-black">Tipo</th>
                 <th className="px-4 py-3 font-medium text-black">Fecha menú</th>
                 <th className="px-4 py-3 font-medium text-black">Estado</th>
@@ -137,7 +124,6 @@ export default async function VendedorTicketsPage({
                       )}
                     </td>
                     <td className="px-4 py-3 text-zinc-700">{t.userCedula ?? "—"}</td>
-                    <td className="px-4 py-3 text-zinc-700">{t.userExpediente ?? "—"}</td>
                     <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
                     <td className="px-4 py-3 text-zinc-700">{formatDate(t.mealDate)}</td>
                     <td className="px-4 py-3">

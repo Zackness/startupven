@@ -32,7 +32,7 @@ export type TicketFilterType = {
 export function TicketFilters(props: {
   users: TicketFilterUser[];
   types: TicketFilterType[];
-  initial: { tipo?: string; usuario?: string; fecha?: string; cedula?: string; expediente?: string };
+  initial: { tipo?: string; usuario?: string; fecha?: string; cedula?: string };
 }) {
   const { users, types } = props;
   const router = useRouter();
@@ -46,14 +46,11 @@ export function TicketFilters(props: {
   const fecha = searchParams.get("fecha") ?? props.initial.fecha ?? "";
 
   const initialCedula = searchParams.get("cedula") ?? props.initial.cedula ?? "";
-  const initialExpediente = searchParams.get("expediente") ?? props.initial.expediente ?? "";
   const [cedula, setCedula] = React.useState(initialCedula);
-  const [expediente, setExpediente] = React.useState(initialExpediente);
 
   React.useEffect(() => {
     setCedula(initialCedula);
-    setExpediente(initialExpediente);
-  }, [initialCedula, initialExpediente]);
+  }, [initialCedula]);
 
   const selectedUser = React.useMemo(
     () => (usuario ? users.find((u) => u.id === usuario) : undefined),
@@ -76,38 +73,23 @@ export function TicketFilters(props: {
 
   function clearFilters() {
     setCedula("");
-    setExpediente("");
     const next = new URLSearchParams(searchParams.toString());
     next.delete("tipo");
     next.delete("usuario");
     next.delete("fecha");
     next.delete("cedula");
-    next.delete("expediente");
     next.set("page", "0");
     const qs = next.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname);
   }
 
   const cedulaRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const expedienteRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyCedula = React.useCallback(
     (value: string) => {
       const next = new URLSearchParams(searchParams.toString());
       if (value) next.set("cedula", value);
       else next.delete("cedula");
-      next.set("page", "0");
-      const qs = next.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname);
-    },
-    [pathname, router, searchParams]
-  );
-
-  const applyExpediente = React.useCallback(
-    (value: string) => {
-      const next = new URLSearchParams(searchParams.toString());
-      if (value) next.set("expediente", value);
-      else next.delete("expediente");
       next.set("page", "0");
       const qs = next.toString();
       router.push(qs ? `${pathname}?${qs}` : pathname);
@@ -122,22 +104,15 @@ export function TicketFilters(props: {
     cedulaRef.current = setTimeout(() => applyCedula(value), DEBOUNCE_MS);
   };
 
-  const handleExpedienteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setExpediente(value);
-    if (expedienteRef.current) clearTimeout(expedienteRef.current);
-    expedienteRef.current = setTimeout(() => applyExpediente(value), DEBOUNCE_MS);
-  };
-
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-black">Tipo (comida)</label>
+          <label className="text-sm font-medium text-[var(--foreground)]">Tipo (comida)</label>
           <select
             value={tipo}
             onChange={(e) => setOrClearParam("tipo", e.target.value)}
-            className="flex h-10 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+            className="flex h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
           >
             <option value="">Todos</option>
             {types.map((t) => (
@@ -149,14 +124,14 @@ export function TicketFilters(props: {
         </div>
 
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-black">Usuario</label>
+          <label className="text-sm font-medium text-[var(--foreground)]">Usuario</label>
           <Popover open={userOpen} onOpenChange={setUserOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"
                 aria-expanded={userOpen}
-                className="w-full justify-between border-zinc-300 bg-white text-black hover:bg-zinc-50"
+                className="w-full justify-between border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--muted)]"
               >
                 <span className="truncate text-left">
                   {selectedUser ? selectedUser.label : "Todos"}
@@ -192,7 +167,7 @@ export function TicketFilters(props: {
                         <Check className={cn("mr-2 h-4 w-4", usuario === u.id ? "opacity-100" : "opacity-0")} />
                         <div className="flex flex-col">
                           <span className="text-sm">{u.label}</span>
-                          <span className="text-xs text-zinc-500">{u.email}</span>
+                          <span className="text-xs text-[var(--muted-foreground)]">{u.email}</span>
                         </div>
                       </CommandItem>
                     ))}
@@ -204,29 +179,22 @@ export function TicketFilters(props: {
         </div>
 
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-black">Fecha menú</label>
+          <label className="text-sm font-medium text-[var(--foreground)]">Fecha menú</label>
           <Input
             type="date"
             value={fecha}
             onChange={(e) => setOrClearParam("fecha", e.target.value)}
+            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"
           />
         </div>
 
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-black">Cédula</label>
+          <label className="text-sm font-medium text-[var(--foreground)]">Cédula</label>
           <Input
             value={cedula}
             onChange={handleCedulaChange}
             placeholder="Ej. V-12345678"
-          />
-        </div>
-
-        <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-black">Expediente</label>
-          <Input
-            value={expediente}
-            onChange={handleExpedienteChange}
-            placeholder="Ej. 2024-12345"
+            className="border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"
           />
         </div>
 
@@ -235,7 +203,7 @@ export function TicketFilters(props: {
             type="button"
             variant="outline"
             onClick={clearFilters}
-            className="border-zinc-300 text-white hover:text-white bg-red-800 hover:bg-red-600"
+            className="border-[var(--border)] text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <X className="h-4 w-4" />
             Limpiar

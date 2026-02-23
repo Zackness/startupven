@@ -442,7 +442,6 @@ export async function getUsersForManualSale() {
       email: true,
       name: true,
       cedula: true,
-      expediente: true,
       primerNombre: true,
       segundoNombre: true,
       primerApellido: true,
@@ -462,7 +461,6 @@ export async function getUsersForManualSale() {
     email: u.email,
     label: label(u),
     cedula: u.cedula ?? null,
-    expediente: u.expediente ?? null,
   }));
 }
 
@@ -645,7 +643,6 @@ export async function getAdminTicketsFiltered(
     usuario?: string | null;
     fecha?: string | null;
     cedula?: string | null;
-    expediente?: string | null;
   }
 ) {
   const session = await auth();
@@ -664,15 +661,8 @@ export async function getAdminTicketsFiltered(
       where.mealDate = { gte: day, lt: next };
     }
   }
-  if (filters && (filters.cedula || filters.expediente)) {
-    const userWhere: Prisma.UserWhereInput = {};
-    if (filters.cedula) {
-      userWhere.cedula = { contains: filters.cedula.trim() };
-    }
-    if (filters.expediente) {
-      userWhere.expediente = { contains: filters.expediente.trim() };
-    }
-    where.user = userWhere;
+  if (filters?.cedula) {
+    where.user = { cedula: { contains: filters.cedula.trim() } };
   }
 
   const [tickets, total] = await Promise.all([
@@ -715,7 +705,6 @@ export async function getVendorTicketsFiltered(
   filters?: {
     fecha?: string | null;
     cedula?: string | null;
-    expediente?: string | null;
   }
 ) {
   const session = await ensureVendorOrAdmin();
@@ -734,21 +723,14 @@ export async function getVendorTicketsFiltered(
     }
   }
 
-  if (filters && (filters.cedula || filters.expediente)) {
-    const userWhere: Prisma.UserWhereInput = {};
-    if (filters.cedula) {
-      userWhere.cedula = { contains: filters.cedula.trim() };
-    }
-    if (filters.expediente) {
-      userWhere.expediente = { contains: filters.expediente.trim() };
-    }
-    where.user = userWhere;
+  if (filters?.cedula) {
+    where.user = { cedula: { contains: filters.cedula.trim() } };
   }
 
   const [tickets, total] = await Promise.all([
     db.ticket.findMany({
       where,
-      include: { user: { select: { name: true, email: true, cedula: true, expediente: true } }, ticketType: true },
+      include: { user: { select: { name: true, email: true, cedula: true } }, ticketType: true },
       orderBy: { createdAt: "desc" },
       skip: page * pageSize,
       take: pageSize,
@@ -762,7 +744,6 @@ export async function getVendorTicketsFiltered(
       userName: t.user?.name ?? t.guestName ?? "Invitado",
       userEmail: t.user?.email ?? (t.guestInstitution ? `(${t.guestInstitution})` : "-"),
       userCedula: t.user?.cedula ?? null,
-      userExpediente: t.user?.expediente ?? null,
       ticketTypeName: t.ticketType.name,
       mealDate: t.mealDate,
       usedAt: t.usedAt,

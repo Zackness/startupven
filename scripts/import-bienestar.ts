@@ -16,7 +16,7 @@ import { join } from "path";
 import bcrypt from "bcryptjs";
 import { db } from "../lib/db";
 import { isInstitutionalEmail } from "../lib/email";
-import { UserRole, Gremio } from "../lib/generated/prisma/enums";
+import { UserRole } from "../lib/generated/prisma/enums";
 
 const MD_PATH = join(process.cwd(), "base_datos_bienestar_estudiantil.md");
 const PASSWORD_PLAIN = "123456";
@@ -129,7 +129,6 @@ async function main() {
     segundoApellido: string | null;
     name: string;
     email: string;
-    gremio: "OBRERO" | "PROFESORES";
   }[] = [];
 
   for (const r of rows) {
@@ -142,7 +141,6 @@ async function main() {
 
     if (existingKeys.has(keyFull) || existingKeys.has(keyShort)) continue;
 
-    const gremio = mapGremio(r.gremioRaw)!;
     let email = "";
     const correoClean = r.correo.replace(/\s/g, "").toLowerCase();
     if (correoClean && correoClean.includes("@")) {
@@ -164,7 +162,6 @@ async function main() {
       segundoApellido: segundoApellido || null,
       name: fullName,
       email,
-      gremio,
     });
   }
 
@@ -183,9 +180,7 @@ async function main() {
           name: u.name,
           emailVerified: institutional,
           role: UserRole.CLIENTE,
-          gremio: u.gremio === "OBRERO" ? Gremio.OBRERO : Gremio.PROFESORES,
           cedula: u.cedula,
-          expediente: null,
           primerNombre: u.primerNombre,
           segundoNombre: u.segundoNombre,
           primerApellido: u.primerApellido,

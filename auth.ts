@@ -53,17 +53,7 @@ export const auth = betterAuth({
         defaultValue: "CLIENTE",
         input: false,
       },
-      gremio: {
-        type: "string",
-        required: false,
-        input: false,
-      },
       cedula: {
-        type: "string",
-        required: false,
-        input: false,
-      },
-      expediente: {
         type: "string",
         required: false,
         input: false,

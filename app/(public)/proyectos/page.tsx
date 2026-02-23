@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BRAND_NAME } from "@/components/marca/brand";
-import { proyectos } from "@/data/proyectos";
+import { getProjectsForPublic } from "@/lib/actions/projects";
 import { ProyectoCard } from "@/components/proyecto-card";
+import { ProyectoPreviewIframe } from "@/components/proyecto-preview-iframe";
 
 export const metadata = {
   title: `Proyectos | ${BRAND_NAME}`,
@@ -9,21 +10,22 @@ export const metadata = {
     "Sistemas y plataformas en producción. Infraestructura digital que hemos diseñado y construido.",
 };
 
-export default function ProyectosPage() {
+export default async function ProyectosPage() {
+  const proyectos = await getProjectsForPublic();
   const [destacado, ...resto] = proyectos;
 
   return (
     <div className="min-h-screen">
       {/* Hero de la página */}
-      <section className="border-b border-[var(--border)] px-4 py-20 sm:px-6 md:py-24">
+      <section className="border-b border-[var(--border)] px-6 py-12 sm:px-8 sm:py-14">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted-foreground)]">
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
             Proyectos
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl md:text-5xl">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl md:text-4xl">
             Sistemas en producción
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-[var(--muted-foreground)] leading-relaxed">
+          <p className="mx-auto mt-3 max-w-2xl text-[15px] text-[var(--muted-foreground)] leading-relaxed">
             Plataformas y sistemas que hemos diseñado y construido. Infraestructura digital operativa.
           </p>
         </div>
@@ -31,20 +33,26 @@ export default function ProyectosPage() {
 
       {/* Proyecto destacado (el primero, más grande) */}
       {destacado && (
-        <section className="border-b border-[var(--border)] px-4 py-14 sm:px-6 md:py-20">
+        <section className="border-b border-[var(--border)] px-6 py-12 sm:px-8 sm:py-14">
           <div className="mx-auto max-w-6xl">
-            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-[var(--muted-foreground)]">
+            <p className="mb-6 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
               Destacado
             </p>
-            <div className="rounded-md border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/15">
-              <Link href="/contacto" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 rounded-md">
-                <div className="grid overflow-hidden rounded-md sm:grid-cols-2">
-                  <div className="relative h-52 min-h-[12rem] bg-[var(--muted)] sm:h-64">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/15 hover:shadow-sm">
+              <Link href="/contacto" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 rounded-2xl">
+                <div className="grid overflow-hidden rounded-2xl sm:grid-cols-2">
+                  <div className="relative h-52 min-h-[12rem] overflow-hidden bg-[var(--muted)] sm:h-64">
                     {destacado.imagen ? (
                       <img
                         src={destacado.imagen}
                         alt={destacado.titulo}
                         className="h-full w-full object-cover"
+                      />
+                    ) : destacado.url ? (
+                      <ProyectoPreviewIframe
+                        url={destacado.url}
+                        title={destacado.titulo}
+                        className="absolute inset-0 h-full w-full"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-[var(--muted)]" />
@@ -58,7 +66,7 @@ export default function ProyectosPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-col justify-center p-6 sm:p-8">
+                  <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
                     <h2 className="text-xl font-semibold text-[var(--card-foreground)] sm:text-2xl">
                       {destacado.titulo}
                     </h2>
@@ -77,14 +85,17 @@ export default function ProyectosPage() {
       )}
 
       {/* Grid del resto de proyectos */}
-      <section className="px-4 py-14 sm:px-6 md:py-20">
+      <section className="px-6 py-12 sm:px-8 sm:py-14">
         <div className="mx-auto max-w-6xl">
           {resto.length > 0 && (
             <>
-              <h2 className="text-xl font-bold tracking-tight text-[var(--foreground)] sm:text-2xl">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                 Más proyectos
+              </p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-[var(--foreground)] sm:text-2xl">
+                Otros sistemas
               </h2>
-              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-8 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
                 {resto.map((proyecto) => (
                   <ProyectoCard key={proyecto.id} proyecto={proyecto} variant="grid" />
                 ))}
@@ -95,17 +106,17 @@ export default function ProyectosPage() {
       </section>
 
       {/* CTA final */}
-      <section className="border-t border-[var(--border)] bg-[var(--primary)] px-4 py-20 sm:px-6 md:py-24">
+      <section className="border-t border-[var(--border)] bg-[var(--primary)] px-6 py-12 sm:px-8 sm:py-14">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-xl font-bold tracking-tight text-[var(--primary-foreground)] sm:text-2xl">
             Iniciar conversación
           </h2>
-          <p className="mt-3 text-[var(--primary-foreground)]/90">
+          <p className="mt-3 text-[15px] text-[var(--primary-foreground)]/90">
             Para definir alcance, plazos y condiciones.
           </p>
           <Link
             href="/contacto"
-            className="mt-6 inline-block rounded-md border border-[var(--primary-foreground)] bg-[var(--primary-foreground)] px-5 py-2.5 text-sm font-medium text-[var(--primary)] transition-colors hover:opacity-90"
+            className="mt-6 inline-block rounded-lg bg-[var(--primary-foreground)] px-5 py-2.5 text-sm font-medium text-[var(--primary)] transition-colors hover:opacity-90"
           >
             Contactar
           </Link>

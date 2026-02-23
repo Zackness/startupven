@@ -16,9 +16,9 @@ export default async function EscritorioLayout({
   return (
     <SidebarShell
       storageKey="sidebar:escritorio:open"
-      title="Escritorio"
-      subtitle="Comedor universitario"
-      maxWidthClass="max-w-5xl"
+      title="STVN"
+      subtitle="Escritorio · Sistema estructurado"
+      maxWidthClass="max-w-6xl"
       nav={<EscritorioSidebar role={role} />}
       headerRight={
         <>

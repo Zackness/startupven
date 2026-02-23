@@ -32,7 +32,6 @@ export type ManualSaleUser = {
   label: string;
   email: string;
   cedula: string | null;
-  expediente: string | null;
 };
 
 export type ManualSaleType = {
@@ -253,7 +252,7 @@ export function AdminVentasPendientesForm(props: { users: ManualSaleUser[]; type
                               {props.users.map((u) => (
                                 <CommandItem
                                   key={u.id}
-                                  value={`${u.label} ${u.email} ${u.cedula ?? ""} ${u.expediente ?? ""}`}
+                                  value={`${u.label} ${u.email} ${u.cedula ?? ""}`}
                                   onSelect={() => {
                                     updateBuyerUser(row.id, u.id);
                                     setUserPopoverOpen(null);

@@ -1,91 +1,178 @@
-import { getAdminStats } from "@/lib/actions/tickets";
-import { Ticket, CalendarDays, UtensilsCrossed, ShoppingCart } from "lucide-react";
-import { PieChart } from "./admin-charts";
+import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { getProjects } from "@/lib/actions/projects";
+import { getAdminUsers } from "@/lib/actions/users";
+import { ADMIN_PATH } from "@/routes";
+import { FolderKanban, Users, ArrowRight, QrCode, UtensilsCrossed, Cog, Settings } from "lucide-react";
 
 export default async function AdminPage() {
-  const stats = await getAdminStats();
+  const session = await auth();
+  const role = (session?.user as unknown as { role?: string })?.role;
+  const isAdmin = role === "ADMIN";
+
+  const [projects, usersResult] = await Promise.all([
+    getProjects(),
+    isAdmin ? getAdminUsers(null) : Promise.resolve([]),
+  ]);
+  const totalUsers = Array.isArray(usersResult) ? usersResult.length : 0;
+
+  if (!isAdmin) {
+    return (
+      <div className="space-y-14 sm:space-y-16">
+        <section>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+            Panel editor
+          </h1>
+          <p className="mt-3 text-[15px] text-[var(--muted-foreground)] max-w-xl leading-relaxed">
+            Gestiona proyectos web, escaneo y platos.
+          </p>
+        </section>
+        <section>
+          <p className="mb-6 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+            Acceso rápido
+          </p>
+          <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
+            <Link
+              href={`${ADMIN_PATH}/proyectos`}
+              className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+            >
+              <div className="flex items-start justify-between">
+                <div className="rounded-xl bg-[var(--muted)] p-3">
+                  <FolderKanban className="h-6 w-6 text-[var(--foreground)]" />
+                </div>
+                <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+              </div>
+              <div className="mt-6">
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Proyectos web</p>
+                <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">{projects.length}</p>
+              </div>
+            </Link>
+            <Link
+              href={`${ADMIN_PATH}/escaneo`}
+              className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+            >
+              <div className="flex items-start justify-between">
+                <div className="rounded-xl bg-[var(--muted)] p-3">
+                  <QrCode className="h-6 w-6 text-[var(--foreground)]" />
+                </div>
+                <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+              </div>
+              <div className="mt-6">
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Escanear QR</p>
+                <p className="mt-2 text-sm text-[var(--muted-foreground)]">Validar tickets</p>
+              </div>
+            </Link>
+            <Link
+              href={`${ADMIN_PATH}/almuerzos`}
+              className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+            >
+              <div className="flex items-start justify-between">
+                <div className="rounded-xl bg-[var(--muted)] p-3">
+                  <UtensilsCrossed className="h-6 w-6 text-[var(--foreground)]" />
+                </div>
+                <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+              </div>
+              <div className="mt-6">
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Platos</p>
+                <p className="mt-2 text-sm text-[var(--muted-foreground)]">Gestionar menú</p>
+              </div>
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-black">
+    <div className="space-y-14 sm:space-y-16">
+      <section>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
           Panel de administración
         </h1>
-        <p className="mt-1 text-zinc-600">
-          Comedor universitario — venta y control de tickets
+        <p className="mt-3 text-[15px] text-[var(--muted-foreground)] max-w-xl leading-relaxed">
+          Plataforma e infraestructura digital. Proyectos, usuarios y configuración.
         </p>
-      </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-zinc-100 p-2">
-              <Ticket className="h-6 w-6 text-black" />
+      <section>
+        <p className="mb-6 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+          Plataforma
+        </p>
+        <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
+          <Link
+            href={`${ADMIN_PATH}/proyectos`}
+            className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-[var(--muted)] p-3">
+                <FolderKanban className="h-6 w-6 text-[var(--foreground)]" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-600">Total tickets</p>
-              <p className="text-2xl font-bold text-black">{stats.totalTickets}</p>
+            <div className="mt-6">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Proyectos web</p>
+              <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">{projects.length}</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">Publicados en /proyectos</p>
             </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-green-100 p-2">
-              <ShoppingCart className="h-6 w-6 text-green-700" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-600">Ventas hoy</p>
-              <p className="text-2xl font-bold text-black">{stats.salesToday}</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-amber-100 p-2">
-              <CalendarDays className="h-6 w-6 text-amber-700" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-600">Tickets menú hoy</p>
-              <p className="text-2xl font-bold text-black">{stats.ticketsTodayMenu}</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-blue-100 p-2">
-              <UtensilsCrossed className="h-6 w-6 text-blue-700" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-600">Platos activos</p>
-              <p className="text-2xl font-bold text-black">{stats.ticketTypesCount}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+          </Link>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-zinc-600">Total usuarios</p>
-          <p className="mt-1 text-3xl font-bold text-black">{stats.totalUsers}</p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-600">
-            {stats.usersByRole.map((r) => (
-              <span key={r.role} className="rounded-full bg-zinc-100 px-2 py-1">
-                {r.role}: <span className="font-semibold text-black">{r.count}</span>
-              </span>
-            ))}
-          </div>
+          <Link
+            href={`${ADMIN_PATH}/usuarios`}
+            className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-[var(--muted)] p-3">
+                <Users className="h-6 w-6 text-[var(--foreground)]" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+            </div>
+            <div className="mt-6">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Usuarios</p>
+              <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">{totalUsers}</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">Gestión de roles y acceso</p>
+            </div>
+          </Link>
         </div>
+      </section>
 
-        <PieChart
-          title="Estado de tickets"
-          data={[
-            { label: "Pendiente pago", value: stats.ticketsPendingPayment, color: "#f59e0b" },
-            { label: "Canjeado", value: stats.ticketsRedeemed, color: "#16a34a" },
-            { label: "Vencido", value: stats.ticketsExpired, color: "#dc2626" },
-            { label: "Disponible", value: stats.ticketsAvailable, color: "#2563eb" },
-          ]}
-        />
-      </div>
+      <section>
+        <p className="mb-6 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+          Acceso rápido
+        </p>
+        <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
+          <Link
+            href={`${ADMIN_PATH}/operacion`}
+            className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-[var(--muted)] p-3">
+                <Cog className="h-6 w-6 text-[var(--foreground)]" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+            </div>
+            <div className="mt-6">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Operación</p>
+              <p className="mt-2 text-sm text-[var(--muted-foreground)]">Tickets, ventas, escaneo y platos</p>
+            </div>
+          </Link>
+
+          <Link
+            href={`${ADMIN_PATH}/configuracion`}
+            className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm sm:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-[var(--muted)] p-3">
+                <Settings className="h-6 w-6 text-[var(--foreground)]" />
+              </div>
+              <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+            </div>
+            <div className="mt-6">
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Configuración</p>
+              <p className="mt-2 text-sm text-[var(--muted-foreground)]">Marca y sitio</p>
+            </div>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

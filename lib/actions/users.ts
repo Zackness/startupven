@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import type { UserRole, Gremio } from "@/lib/generated/prisma/enums";
+import type { UserRole } from "@/lib/generated/prisma/enums";
 import bcrypt from "bcryptjs";
 
 async function ensureAdmin() {
@@ -23,7 +23,6 @@ export async function getAdminUsers(search?: string | null) {
           { name: { contains: term } },
           { email: { contains: term } },
           { cedula: { contains: term } },
-          { expediente: { contains: term } },
           { primerNombre: { contains: term } },
           { segundoNombre: { contains: term } },
           { primerApellido: { contains: term } },
@@ -40,9 +39,7 @@ export async function getAdminUsers(search?: string | null) {
       email: true,
       name: true,
       role: true,
-      gremio: true,
       cedula: true,
-      expediente: true,
       primerNombre: true,
       segundoNombre: true,
       primerApellido: true,
@@ -57,9 +54,7 @@ export async function updateUser(
   userId: string,
   data: {
     role?: UserRole;
-    gremio?: Gremio | null;
     cedula?: string | null;
-    expediente?: string | null;
     primerNombre?: string | null;
     segundoNombre?: string | null;
     primerApellido?: string | null;
@@ -76,9 +71,7 @@ export async function updateUser(
     where: { id: userId },
     data: {
       ...(data.role != null && { role: data.role }),
-      ...(data.gremio !== undefined && { gremio: data.gremio }),
       ...(data.cedula !== undefined && { cedula: data.cedula || null }),
-      ...(data.expediente !== undefined && { expediente: data.expediente || null }),
       ...(data.primerNombre !== undefined && { primerNombre: data.primerNombre || null }),
       ...(data.segundoNombre !== undefined && { segundoNombre: data.segundoNombre || null }),
       ...(data.primerApellido !== undefined && { primerApellido: data.primerApellido || null }),
@@ -95,9 +88,7 @@ export async function createAdminUser(data: {
   password: string;
   name: string;
   role: UserRole;
-  gremio?: Gremio | null;
   cedula?: string | null;
-  expediente?: string | null;
   primerNombre?: string | null;
   segundoNombre?: string | null;
   primerApellido?: string | null;
@@ -122,9 +113,7 @@ export async function createAdminUser(data: {
       name: data.name.trim(),
       emailVerified: true,
       role: data.role,
-      gremio: data.gremio ?? null,
       cedula: data.cedula ?? null,
-      expediente: data.expediente ?? null,
       primerNombre: data.primerNombre ?? null,
       segundoNombre: data.segundoNombre ?? null,
       primerApellido: data.primerApellido ?? null,

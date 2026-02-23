@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ProyectoCard } from "@/components/proyecto-card";
+import { Button } from "@/components/ui/button";
 import type { Proyecto } from "@/data/proyectos";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -286,64 +287,55 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
     <>
       <section
         ref={heroRef}
-        className="relative px-4 py-20 sm:px-6 md:py-28"
+        className="relative border-t border-[var(--border)] px-6 py-20 sm:px-8 md:py-28"
       >
         <div className="mx-auto max-w-4xl text-center">
-          <h1 ref={heroTitleRef} className="text-4xl font-bold tracking-tight text-[var(--foreground)] sm:text-5xl md:text-6xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-1 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+            Infraestructura digital
+          </span>
+          <h1 ref={heroTitleRef} className="mt-6 text-4xl font-bold tracking-tight text-[var(--foreground)] sm:text-5xl md:text-6xl">
             Construimos ecosistemas digitales escalables
           </h1>
           <p ref={heroSubtitleRef} className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted-foreground)]">
             Diseñamos y desarrollamos infraestructura tecnológica a largo plazo. Plataformas SaaS, sistemas modulares y un único punto de contacto.
           </p>
           <div ref={heroBtnsRef} className="mt-12 flex flex-wrap justify-center gap-3">
-            <Link
-              href="#ai-launch"
-              className="rounded-md border border-[var(--primary)] bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:opacity-90"
-            >
-              Iniciar arquitectura
-            </Link>
-            <Link
-              href="/servicios"
-              className="rounded-md border border-[var(--border)] bg-transparent px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]"
-            >
-              Explorar ecosistema
-            </Link>
-            <Link
-              href="/contacto"
-              className="rounded-md border border-[var(--border)] bg-transparent px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]"
-            >
-              Contactar
-            </Link>
-            <Link
-              href="/dashboard"
-              className="rounded-md border border-[var(--border)] bg-transparent px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]"
-            >
-              Área de clientes
-            </Link>
+            <Button asChild size="lg" className="rounded-xl border border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+              <Link href="#ai-launch">Iniciar arquitectura</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-[var(--border)]">
+              <Link href="/servicios">Explorar ecosistema</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-[var(--border)]">
+              <Link href="/contacto">Contactar</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-[var(--border)]">
+              <Link href="/dashboard">Área de clientes</Link>
+            </Button>
           </div>
           <p ref={heroTaglineRef} className="mt-10 text-center text-sm text-[var(--muted-foreground)]">
-            Lauch -{">"} Build -{">"} Scale
+            Launch → Build → Scale
           </p>
         </div>
       </section>
 
       {/* Why STARTUPVEN — confianza y autoridad de entrada */}
-      <section ref={whyRef} className="px-4 py-20 sm:px-6 md:py-24">
+      <section ref={whyRef} className="border-y border-[var(--border)] bg-[var(--muted)]/30 px-6 py-20 sm:px-8 md:py-24">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-center text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
             Por qué STARTUPVEN
           </h2>
           <ul className="mt-12 grid gap-6 sm:grid-cols-2">
-            <li className="bg-[var(--card)] p-5 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
+            <li className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
               Diseñamos sistemas.
             </li>
-            <li className="bg-[var(--card)] p-5 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
+            <li className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
               Estructuramos el crecimiento.
             </li>
-            <li className="bg-[var(--card)] p-5 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
+            <li className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
               Construimos infraestructura.
             </li>
-            <li className="bg-[var(--card)] p-5 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
+            <li className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]">
               No improvisamos.
             </li>
           </ul>
@@ -351,7 +343,7 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
       </section>
 
       {/* Digital Maturity Ladder — Launch → Builder → Custom */}
-      <section ref={ladderRef} className="bg-[var(--muted)]/40 px-4 py-20 sm:px-6 md:py-24">
+      <section ref={ladderRef} className="border-y border-[var(--border)] bg-[var(--muted)]/30 px-4 py-20 sm:px-6 md:py-24">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-center text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
             Evolución dentro del ecosistema
@@ -360,25 +352,25 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
             No abandonas la plataforma. Evolucionas en ella.
           </p>
           <div className="mt-14 flex flex-col items-stretch gap-6 sm:flex-row sm:justify-center sm:gap-8">
-            <div className="ladder-card flex flex-1 flex-col items-center bg-[var(--card)] p-6 text-center transition-transform duration-300 hover:translate-y-[-2px]">
-              <span className="text-xs font-medium uppercase tracking-widest text-[var(--muted-foreground)]">Nivel 1</span>
-              <h3 className="mt-2 text-lg font-semibold text-[var(--foreground)]">Launch</h3>
+            <div className="ladder-card flex flex-1 flex-col items-center rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-transform duration-300 hover:translate-y-[-2px]">
+              <span className="inline-flex rounded-full border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-1 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Nivel 1</span>
+              <h3 className="mt-3 text-lg font-semibold text-[var(--foreground)]">Launch</h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Validar ideas. Páginas iniciales con IA. Presencia digital estructurada.
+                Validar ideas. Primera presencia digital con arquitectura definida.
               </p>
             </div>
             <div className="hidden shrink-0 self-center sm:block sm:w-6 text-[var(--muted-foreground)]" aria-hidden>→</div>
-            <div className="ladder-card flex flex-1 flex-col items-center bg-[var(--card)] p-6 text-center transition-transform duration-300 hover:translate-y-[-2px]">
-              <span className="text-xs font-medium uppercase tracking-widest text-[var(--muted-foreground)]">Nivel 2</span>
-              <h3 className="mt-2 text-lg font-semibold text-[var(--foreground)]">Builder</h3>
+            <div className="ladder-card flex flex-1 flex-col items-center rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-transform duration-300 hover:translate-y-[-2px]">
+              <span className="inline-flex rounded-full border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-1 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Nivel 2</span>
+              <h3 className="mt-3 text-lg font-semibold text-[var(--foreground)]">Builder</h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
                 Más control. Editor visual. CMS, ecommerce, módulos. Autonomía dentro de límites.
               </p>
             </div>
             <div className="hidden shrink-0 self-center sm:block sm:w-6 text-[var(--muted-foreground)]" aria-hidden>→</div>
-            <div className="ladder-card flex flex-1 flex-col items-center bg-[var(--card)] p-6 text-center transition-transform duration-300 hover:translate-y-[-2px]">
-              <span className="text-xs font-medium uppercase tracking-widest text-[var(--muted-foreground)]">Nivel 3</span>
-              <h3 className="mt-2 text-lg font-semibold text-[var(--foreground)]">Custom</h3>
+            <div className="ladder-card flex flex-1 flex-col items-center rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-transform duration-300 hover:translate-y-[-2px]">
+              <span className="inline-flex rounded-full border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-1 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Nivel 3</span>
+              <h3 className="mt-3 text-lg font-semibold text-[var(--foreground)]">Custom</h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
                 Sistemas a medida. SaaS, multi-tenant, infraestructura escalable.
               </p>
@@ -388,13 +380,13 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
       </section>
 
       {/* Proyectos — prueba social antes de pedir acción */}
-      <section ref={proyectosRef} className="px-4 py-20 sm:px-6 md:py-24">
+      <section ref={proyectosRef} className="border-t border-[var(--border)] px-4 py-20 sm:px-6 md:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="proyectos-header">
-            <p className="text-center text-xs font-medium uppercase tracking-widest text-[var(--muted-foreground)]">
+            <span className="inline-flex rounded-full border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-1 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
               Proyectos
-            </p>
-            <h2 className="mt-2 text-center text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+            </span>
+            <h2 className="mt-4 text-center text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
               Sistemas en producción
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-[var(--muted-foreground)]">
@@ -412,29 +404,23 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
             ))}
           </div>
           <div className="mt-12 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link
-              href="/proyectos"
-              className="rounded-md border border-[var(--primary)] bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:opacity-90"
-            >
-              Ver todos los proyectos
-            </Link>
-            <Link
-              href="/contacto"
-              className="rounded-md border border-[var(--border)] bg-transparent px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]"
-            >
-              Contactar
-            </Link>
+            <Button asChild size="lg" className="rounded-xl border border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+              <Link href="/proyectos">Ver todos los proyectos</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-[var(--border)]">
+              <Link href="/contacto">Contactar</Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* AI Launch — acción de conversión tras ver prueba social */}
-      <section ref={aiLaunchRef} id="ai-launch" className="bg-[var(--muted)]/40 px-4 py-20 sm:px-6 md:py-24">
+      <section ref={aiLaunchRef} id="ai-launch" className="border-y border-[var(--border)] bg-[var(--muted)]/30 px-4 py-20 sm:px-6 md:py-24">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-center text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
             Iniciar arquitectura
           </h2>
-          <div className="ai-launch-block mt-10 bg-[var(--card)] p-6">
+          <div className="ai-launch-block mt-10 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
             <label htmlFor="ai-prompt" className="sr-only">
               Describir la arquitectura digital a iniciar
             </label>
@@ -442,15 +428,16 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
               id="ai-prompt"
               rows={4}
               placeholder="Describe la arquitectura digital que quieres iniciar."
-              className="w-full resize-none bg-[var(--background)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
             />
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button
+              <Button
                 type="button"
-                className="rounded-md border border-[var(--primary)] bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:opacity-90"
+                size="lg"
+                className="rounded-xl border border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90"
               >
                 Generar base estructural
-              </button>
+              </Button>
               <p className="text-sm text-[var(--muted-foreground)]">
                 Ideal para validar ideas y lanzar tu primera presencia digital.
               </p>
@@ -459,7 +446,7 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
         </div>
       </section>
 
-      <section ref={enfoqueRef} className="px-4 py-20 sm:px-6 md:py-24">
+      <section ref={enfoqueRef} className="border-t border-[var(--border)] px-4 py-20 sm:px-6 md:py-24">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-center text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
             Enfoque
@@ -471,9 +458,9 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
             {ENFOQUE_ITEMS.map((item) => (
               <div
                 key={item.title}
-                className="enfoque-card bg-[var(--card)] p-5 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]"
+                className="enfoque-card rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]"
               >
-                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <h3 className="text-lg font-semibold text-[var(--foreground)]">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
                   {item.description}
                 </p>
@@ -483,7 +470,7 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
           <div className="mt-10 text-center">
             <Link
               href="/servicios"
-              className="text-sm font-medium text-[var(--foreground)] hover:underline"
+              className="inline-flex items-center gap-1 rounded-xl border border-[var(--border)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]"
             >
               Ver todos los servicios →
             </Link>
@@ -492,31 +479,25 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
       </section>
 
       {/* Evolution Statement — cierre y refuerzo */}
-      <section ref={evolutionRef} className="px-4 py-20 sm:px-6 md:py-24">
+      <section ref={evolutionRef} className="border-y border-[var(--border)] bg-[var(--muted)]/30 px-4 py-20 sm:px-6 md:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
             Empieza simple. Evoluciona de forma estructurada.
           </p>
           <div className="evolution-btns mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="#ai-launch"
-              className="rounded-md border border-[var(--primary)] bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:opacity-90"
-            >
-              Iniciar arquitectura
-            </Link>
-            <Link
-              href="/contacto"
-              className="rounded-md border border-[var(--border)] bg-transparent px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]"
-            >
-              Consulta personalizada
-            </Link>
+            <Button asChild size="lg" className="rounded-xl border border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+              <Link href="#ai-launch">Iniciar arquitectura</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-[var(--border)]">
+              <Link href="/contacto">Consulta personalizada</Link>
+            </Button>
           </div>
         </div>
       </section>
 
       <section
         ref={clientesRef}
-        className="bg-[var(--muted)] px-4 py-20 sm:px-6 md:py-24"
+        className="border-t border-[var(--border)] bg-[var(--muted)]/20 px-4 py-20 sm:px-6 md:py-24"
       >
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-xl font-bold tracking-tight text-[var(--foreground)] sm:text-2xl">
@@ -525,12 +506,9 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
           <p className="mt-3 text-[var(--muted-foreground)]">
             Gestión de proyectos, facturación y soporte. Un único panel para tu relación con nosotros.
           </p>
-          <Link
-            href="/dashboard"
-            className="mt-6 inline-block rounded-md border border-[var(--primary)] bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:opacity-90"
-          >
-            Acceder
-          </Link>
+          <Button asChild size="lg" className="mt-6 rounded-xl border border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+            <Link href="/dashboard">Acceder</Link>
+          </Button>
         </div>
       </section>
     </>

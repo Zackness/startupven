@@ -4,12 +4,22 @@ export const metadata = {
 
 export default function AvisoLegalPage() {
   return (
-    <div className="px-4 py-16 sm:px-6">
+    <div className="border-t border-[var(--border)] px-6 py-12 sm:px-8 sm:py-14">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-bold text-[var(--foreground)]">Aviso legal</h1>
-        <p className="mt-4 text-[var(--muted-foreground)]">
-          Información legal del sitio. Incluye aquí los datos de tu empresa y condiciones de uso.
+        <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+          Legal
         </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+          Aviso legal
+        </h1>
+        <p className="mt-3 text-[15px] text-[var(--muted-foreground)] leading-relaxed">
+          Información legal del sitio. Datos de la empresa y condiciones de uso.
+        </p>
+        <div className="mt-10 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+          <p className="text-[15px] text-[var(--muted-foreground)] leading-relaxed">
+            Contenido del aviso legal.
+          </p>
+        </div>
       </div>
     </div>
   );

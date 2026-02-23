@@ -1,9 +1,8 @@
 import * as z from "zod";
-import { UserRole, Gremio } from "@/lib/generated/prisma/enums";
+import { UserRole } from "@/lib/generated/prisma/enums";
 
 // Alineados con los enums de Prisma
 export const UserRoleSchema = z.nativeEnum(UserRole);
-export const UserGremioSchema = z.nativeEnum(Gremio);
 
 export const SettingsSchema = z.object ({
     name: z.optional(z.string()),

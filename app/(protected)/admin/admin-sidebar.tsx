@@ -2,24 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, ClipboardList, QrCode, ShoppingCart, Ticket, UtensilsCrossed, Users } from "lucide-react";
+import { Home, LayoutDashboard, UtensilsCrossed, Users, FolderKanban, Settings, Cog, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ADMIN_PATH, EDITOR_PATH, ESCRITORIO_PATH, VENDEDOR_PATH } from "@/routes";
 import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
+/** Admin: enfoque en plataforma (marca) y operación agrupada. */
 const adminItems = [
   { href: ADMIN_PATH, label: "Panel", icon: LayoutDashboard },
-  { href: `${ADMIN_PATH}/tickets`, label: "Tickets", icon: Ticket },
-  { href: VENDEDOR_PATH, label: "Vender", icon: ShoppingCart },
-  { href: `${ADMIN_PATH}/ventas-pendientes`, label: "Ventas pendientes", icon: ClipboardList },
-  { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
-  { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
+  { href: `${ADMIN_PATH}/proyectos`, label: "Proyectos web", icon: FolderKanban },
   { href: `${ADMIN_PATH}/usuarios`, label: "Usuarios", icon: Users },
+  { href: `${ADMIN_PATH}/operacion`, label: "Operación", icon: Cog },
+  { href: `${ADMIN_PATH}/configuracion`, label: "Configuración", icon: Settings },
   { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },
 ] as const;
 
+/** Editor: contenido y operación del día a día. */
 const editorItems = [
-  { href: EDITOR_PATH, label: "Panel editor", icon: LayoutDashboard },
+  { href: EDITOR_PATH, label: "Panel", icon: LayoutDashboard },
+  { href: `${ADMIN_PATH}/proyectos`, label: "Proyectos web", icon: FolderKanban },
   { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
   { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
   { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },
@@ -60,8 +61,14 @@ export function AdminSidebar({
           );
         })}
       </div>
-      <div className="mt-auto border-t border-[var(--border)] pt-3">
+      <div className="mt-auto space-y-3 border-t border-[var(--border)] pt-4">
         <SignOutSidebarItem inactiveClassName="text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--foreground)]" />
+        <p className="px-3 text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">
+          STARTUPVEN
+        </p>
+        <p className="px-3 text-[11px] text-[var(--muted-foreground)]">
+          Infraestructura digital
+        </p>
       </div>
     </nav>
   );

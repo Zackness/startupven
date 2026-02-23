@@ -45,10 +45,18 @@ export function ChangePasswordForm() {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="mb-4 text-lg font-semibold text-black">Cambiar contraseña</h2>
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+      <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+        Seguridad
+      </p>
+      <h2 className="mt-2 text-xl font-semibold tracking-tight text-[var(--foreground)]">
+        Cambiar contraseña
+      </h2>
+      <p className="mt-2 text-[15px] text-[var(--muted-foreground)] leading-relaxed">
+        Usa una contraseña segura y no la compartas.
+      </p>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
           <FormField
             control={form.control}
             name="currentPassword"
@@ -61,11 +69,12 @@ export function ChangePasswordForm() {
                       type={showCurrent ? "text" : "password"}
                       placeholder="Contraseña actual"
                       disabled={isPending}
+                      className="border-[var(--border)] bg-[var(--background)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrent((s) => !s)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-black"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                     >
                       {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -87,11 +96,12 @@ export function ChangePasswordForm() {
                       type={showNew ? "text" : "password"}
                       placeholder="Nueva contraseña (mín. 8 caracteres)"
                       disabled={isPending}
+                      className="border-[var(--border)] bg-[var(--background)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNew((s) => !s)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-black"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                     >
                       {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -103,7 +113,11 @@ export function ChangePasswordForm() {
           />
           <FormError message={error} />
           <FormSuccess message={success} />
-          <Button type="submit" disabled={isPending} className="bg-black text-white hover:bg-zinc-800">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90"
+          >
             {isPending ? "Guardando…" : "Cambiar contraseña"}
           </Button>
         </form>

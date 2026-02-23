@@ -64,8 +64,8 @@ export function SidebarShell(props: {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--background)]">
-            <div className={cn("mx-auto flex h-14 items-center justify-between gap-3 px-4", props.maxWidthClass)}>
+          <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/80">
+            <div className={cn("mx-auto flex h-14 items-center justify-between gap-3 px-6 sm:px-8", props.maxWidthClass)}>
               <div className="flex items-center gap-2">
                 {/* Mobile menu */}
                 <div className="md:hidden">
@@ -102,7 +102,7 @@ export function SidebarShell(props: {
             </div>
           </header>
 
-          <main className={cn("mx-auto w-full px-4 py-8", props.maxWidthClass)}>{props.children}</main>
+          <main className={cn("mx-auto w-full px-6 py-10 sm:px-8 sm:py-12", props.maxWidthClass)}>{props.children}</main>
         </div>
       </div>
     </div>

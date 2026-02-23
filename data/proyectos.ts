@@ -9,8 +9,10 @@ export interface Proyecto {
   descripcion: string;
   tipo: string;
   año: string;
-  /** URL de la imagen del proyecto (ej. /images/proyectos/nombre.jpg). Si no hay, se usa un placeholder visual. */
+  /** URL de la imagen del proyecto. Si no hay, se usa vista previa del sitio (url) o placeholder. */
   imagen?: string;
+  /** URL del sitio en vivo. Si no hay imagen, se renderiza la página como vista previa. */
+  url?: string;
 }
 
 export const proyectos: Proyecto[] = [

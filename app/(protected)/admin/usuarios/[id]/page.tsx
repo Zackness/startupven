@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { ADMIN_PATH } from "@/routes";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { EditUserForm } from "../edit-user-form";
 
@@ -25,9 +24,7 @@ export default async function AdminEditUserPage({
       email: true,
       name: true,
       role: true,
-      gremio: true,
       cedula: true,
-      expediente: true,
       primerNombre: true,
       segundoNombre: true,
       primerApellido: true,
@@ -40,25 +37,29 @@ export default async function AdminEditUserPage({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <Link href={`${ADMIN_PATH}/usuarios`}>
-          <Button variant="ghost" size="sm">
+    <div className="space-y-12 sm:space-y-14">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <Link
+            href={`${ADMIN_PATH}/usuarios`}
+            className="inline-flex items-center gap-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+          >
             <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Button>
-        </Link>
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold text-black">
-          Editar usuario
-        </h1>
-        <p className="mt-1 text-zinc-600">
-          {target.email}
-        </p>
-      </div>
+            Volver a usuarios
+          </Link>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+            Editar
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+            {target.name || target.email}
+          </h1>
+          <p className="mt-1 text-[15px] text-[var(--muted-foreground)]">
+            {target.email}
+          </p>
+        </div>
+      </section>
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-6">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
         <EditUserForm user={target} />
       </div>
     </div>

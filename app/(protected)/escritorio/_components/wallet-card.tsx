@@ -1,28 +1,40 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { Wallet, History } from "lucide-react";
+import Link from "next/link";
+import { Wallet, ArrowRight } from "lucide-react";
+import { ESCRITORIO_PATH } from "@/routes";
 
 interface WalletCardProps {
-    balance: number;
+  balance: number;
 }
 
+/**
+ * Billetera tipo Stripe Connect: saldo = ingresos de pagos en páginas del cliente.
+ * Estilo coherente con el resto del dashboard (Vercel-like).
+ */
 export function WalletCard({ balance }: WalletCardProps) {
-    return (
-        <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-indigo-100">
-                    Mi Billetera
-                </CardTitle>
-                <Wallet className="h-4 w-4 text-indigo-100" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">Bs. {balance.toFixed(2)}</div>
-                <p className="text-xs text-indigo-100 mt-1">
-                    Saldo disponible para compras
-                </p>
-            </CardContent>
-        </Card>
-    );
+  return (
+    <Link
+      href={`${ESCRITORIO_PATH}/billetera`}
+      className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 transition-all hover:border-[var(--foreground)]/20 hover:shadow-sm"
+    >
+      <div className="flex items-start justify-between">
+        <div className="rounded-xl bg-[var(--muted)] p-3">
+          <Wallet className="h-6 w-6 text-[var(--foreground)]" />
+        </div>
+        <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
+      </div>
+      <div className="mt-6">
+        <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+          Billetera
+        </p>
+        <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">
+          USD {balance.toFixed(2)}
+        </p>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          Ingresos disponibles para retirar
+        </p>
+      </div>
+    </Link>
+  );
 }

@@ -91,7 +91,8 @@ export default async function middleware(req: NextRequest) {
         path === adminRoutesPrefix ||
         path === adminRoutesPrefix + "/" ||
         path.startsWith(adminRoutesPrefix + "/almuerzos") ||
-        path.startsWith(adminRoutesPrefix + "/escaneo");
+        path.startsWith(adminRoutesPrefix + "/escaneo") ||
+        path.startsWith(adminRoutesPrefix + "/proyectos");
       if (!editorAllowed) {
         return NextResponse.redirect(new URL(ESCRITORIO_PATH, nextUrl));
       }

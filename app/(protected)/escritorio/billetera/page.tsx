@@ -1,66 +1,95 @@
-import { WalletCard } from "@/app/(protected)/escritorio/_components/wallet-card";
 import { getWalletBalance } from "@/lib/actions/wallet";
-import { TopUpForm } from "@/app/(protected)/escritorio/billetera/top-up-form";
+import { WithdrawForm } from "@/app/(protected)/escritorio/billetera/withdraw-form";
 
+function txLabel(type: string): string {
+  switch (type) {
+    case "DEPOSITO":
+      return "Ingreso";
+    case "RETIRO":
+      return "Retiro";
+    case "COMPRA":
+      return "Compra";
+    case "REEMBOLSO":
+      return "Reembolso";
+    default:
+      return type;
+  }
+}
 
 export default async function WalletPage() {
-    const { balance, transactions } = await getWalletBalance();
+  const { balance, transactions } = await getWalletBalance();
 
-    return (
+  return (
+    <div className="space-y-12 sm:space-y-14">
+      <section>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+          Billetera
+        </h1>
+        <p className="mt-3 text-[15px] text-[var(--muted-foreground)] max-w-xl leading-relaxed">
+          Ingresos por pagos en tus páginas. Retira el saldo cuando quieras a tu cuenta bancaria.
+        </p>
+      </section>
+
+      <div className="grid gap-8 md:grid-cols-2">
         <div className="space-y-8">
-            <div>
-                <h1 className="text-2xl font-bold text-black">Mi Billetera</h1>
-                <p className="mt-1 text-zinc-600">
-                    Gestiona tu saldo y revisa tus movimientos.
-                </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-6">
-                    <WalletCard balance={balance} />
-                    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                        <h3 className="mb-4 font-semibold text-black">Recargar Saldo</h3>
-                        <p className="mb-4 text-sm text-zinc-600">
-                            Agrega fondos a tu billetera mediante Pago Móvil para realizar compras rápidas.
-                        </p>
-                        <TopUpForm />
-                    </div>
-                </div>
-
-                <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
-                    <div className="border-b border-zinc-100 p-4">
-                        <h3 className="font-semibold text-black">Historial de Movimientos</h3>
-                    </div>
-                    <div className="divide-y divide-zinc-100">
-                        {transactions.length === 0 ? (
-                            <div className="p-8 text-center text-sm text-zinc-500">
-                                No hay movimientos recientes.
-                            </div>
-                        ) : (
-                            transactions.map((tx: any) => (
-                                <div key={tx.id} className="flex items-center justify-between p-4">
-                                    <div>
-                                        <p className="font-medium text-black">
-                                            {tx.type === "DEPOSITO" && "Recarga de Saldo"}
-                                            {tx.type === "COMPRA" && "Compra de Ticket"}
-                                            {tx.type === "REEMBOLSO" && "Reembolso"}
-                                        </p>
-                                        <p className="text-xs text-zinc-500">
-                                            {new Date(tx.createdAt).toLocaleDateString()} • {tx.reference}
-                                        </p>
-                                    </div>
-                                    <span
-                                        className={`font-bold ${tx.amount > 0 ? "text-green-600" : "text-black"
-                                            }`}
-                                    >
-                                        {tx.amount > 0 ? "+" : ""}Bs. {tx.amount.toFixed(2)}
-                                    </span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            </div>
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 transition-shadow hover:shadow-sm">
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Saldo</p>
+            <p className="mt-2 text-4xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">
+              USD {balance.toFixed(2)}
+            </p>
+            <p className="mt-1 text-sm text-[var(--muted-foreground)]">Ingresos disponibles para retirar</p>
+          </div>
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+              Retirar saldo
+            </h3>
+            <p className="mt-2 mb-6 text-[15px] text-[var(--muted-foreground)] leading-relaxed">
+              Solicita el retiro a tu cuenta. El equipo procesará la transferencia.
+            </p>
+            <WithdrawForm balance={balance} />
+          </div>
         </div>
-    );
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+          <div className="border-b border-[var(--border)] px-6 py-5">
+            <h3 className="font-semibold text-[var(--foreground)]">Movimientos</h3>
+          </div>
+          <div className="divide-y divide-[var(--border)]">
+            {transactions.length === 0 ? (
+              <div className="px-6 py-14 text-center text-[15px] text-[var(--muted-foreground)]">
+                No hay movimientos recientes.
+              </div>
+            ) : (
+              transactions.map((tx: { id: string; amount: number; type: string; reference: string | null; createdAt: Date }) => (
+                <div key={tx.id} className="flex items-center justify-between px-6 py-4">
+                  <div>
+                    <p className="font-medium text-[var(--foreground)]">
+                      {txLabel(tx.type)}
+                    </p>
+                    {tx.reference && (
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {new Date(tx.createdAt).toLocaleDateString("es-VE")} · {tx.reference}
+                      </p>
+                    )}
+                    {!tx.reference && (
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {new Date(tx.createdAt).toLocaleDateString("es-VE")}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className={`font-semibold tabular-nums ${
+                      tx.amount > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--foreground)]"
+                    }`}
+                  >
+                    {tx.amount > 0 ? "+" : ""} USD {tx.amount.toFixed(2)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -28,8 +28,8 @@ const CategoryColors: Record<TicketCategory, string> = {
 
 export function MenuList({ types, selectedTypeId, onSelect }: MenuListProps) {
     return (
-        <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-            <ul className="divide-y divide-zinc-200">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+            <ul className="divide-y divide-[var(--border)]">
                 {types.map((type) => {
                     const selected = type.id === selectedTypeId;
                     const isDateSpecific = !!type.availableForDate;
@@ -38,17 +38,17 @@ export function MenuList({ types, selectedTypeId, onSelect }: MenuListProps) {
                         <li
                             key={type.id}
                             className={cn(
-                                "flex items-center gap-4 p-4 hover:bg-zinc-50 transition-colors cursor-pointer",
-                                selected && "bg-zinc-50"
+                                "flex items-center gap-4 p-4 hover:bg-[var(--muted)]/50 transition-colors cursor-pointer",
+                                selected && "bg-[var(--muted)]/50"
                             )}
                             onClick={() => onSelect(type.id)}
                         >
                             {/* Thumbnail */}
-                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-zinc-100 border border-zinc-200">
+                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-[var(--muted)] border border-[var(--border)]">
                                 {type.image ? (
                                     <img src={type.image} alt={type.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-zinc-300 text-xl">🍽️</div>
+                                    <div className="flex h-full w-full items-center justify-center text-[var(--muted-foreground)] text-xl">🍽️</div>
                                 )}
                             </div>
 
@@ -67,17 +67,17 @@ export function MenuList({ types, selectedTypeId, onSelect }: MenuListProps) {
                                         </span>
                                     )}
                                 </div>
-                                <h4 className="font-semibold text-black truncate">{type.name}</h4>
-                                {type.description && <p className="text-sm text-zinc-500 truncate">{type.description}</p>}
+                                <h4 className="font-semibold text-[var(--foreground)] truncate">{type.name}</h4>
+                                {type.description && <p className="text-sm text-[var(--muted-foreground)] truncate">{type.description}</p>}
                             </div>
 
                             {/* Price & Action */}
                             <div className="text-right">
-                                <p className="font-bold text-black mb-2">Bs. {type.price.toFixed(2)}</p>
+                                <p className="font-bold text-[var(--foreground)] mb-2">Bs. {type.price.toFixed(2)}</p>
                                 <Button
                                     size="sm"
                                     variant={selected ? "default" : "outline"}
-                                    className={cn("w-full text-white bg-blue-800 hover:bg-blue-600 hover:text-white", selected && "bg-blue-800 text-white")}
+                                    className={cn("w-full border-[var(--border)]", selected && "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90")}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onSelect(type.id);

@@ -42,22 +42,22 @@ export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
     return (
         <div
             className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border bg-white transition-all hover:shadow-md",
-                selected ? "border-black ring-1 ring-black" : "border-zinc-200"
+                "group relative flex flex-col overflow-hidden rounded-lg border bg-[var(--card)] transition-all",
+                selected ? "border-[var(--foreground)] ring-1 ring-[var(--foreground)]" : "border-[var(--border)]"
             )}
             onClick={() => onSelect(type.id)}
         >
             {/* Image Area */}
-            <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
+            <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--muted)]">
                 {type.image ? (
                     <Image
                         src={type.image}
                         alt={type.name}
                         fill
-                        className="object-cover transition-transform group-hover:scale-105"
+                        className="object-cover transition-transform group-hover:scale-[1.02]"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center text-zinc-300">
+                    <div className="flex h-full w-full items-center justify-center text-[var(--muted-foreground)]">
                         <span className="text-4xl">🍽️</span>
                     </div>
                 )}
@@ -80,7 +80,7 @@ export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
                 {/* Date Badge */}
                 {isDateSpecific && dateStr && (
                     <div className="absolute right-3 top-3">
-                        <span className="rounded-full bg-black/70 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                        <span className="rounded-md bg-[var(--foreground)]/80 px-2 py-0.5 text-xs font-medium text-[var(--background)] backdrop-blur-sm">
                             📅 {dateStr}
                         </span>
                     </div>
@@ -90,16 +90,16 @@ export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
             {/* Content */}
             <div className="flex flex-1 flex-col p-4">
                 <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-black line-clamp-1" title={type.name}>
+                    <h3 className="font-semibold text-[var(--foreground)] line-clamp-1" title={type.name}>
                         {type.name}
                     </h3>
-                    <span className="font-medium text-black">
+                    <span className="font-medium text-[var(--foreground)] tabular-nums">
                         Bs. {type.price.toFixed(2)}
                     </span>
                 </div>
 
                 {type.description && (
-                    <p className="mt-2 text-sm text-zinc-500 line-clamp-2">
+                    <p className="mt-2 text-sm text-[var(--muted-foreground)] line-clamp-2">
                         {type.description}
                     </p>
                 )}
@@ -108,7 +108,7 @@ export function MenuCard({ type, selected, onSelect }: MenuCardProps) {
                     <Button
                         size="sm"
                         variant={selected ? "default" : "outline"}
-                        className={cn("w-full text-white hover:text-white bg-blue-800 hover:bg-blue-600", selected && "bg-blue-800 text-white")}
+                        className={cn("w-full border-[var(--border)]", selected && "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90")}
                     >
                         {selected ? "Seleccionado" : "Seleccionar"}
                     </Button>

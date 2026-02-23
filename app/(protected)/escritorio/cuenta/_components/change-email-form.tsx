@@ -45,13 +45,18 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="mb-4 text-lg font-semibold text-black">Cambiar correo</h2>
-      <p className="mb-4 text-sm text-zinc-600">
-        Correo actual: <strong className="text-black">{currentEmail}</strong>
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+      <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+        Correo
+      </p>
+      <h2 className="mt-2 text-xl font-semibold tracking-tight text-[var(--foreground)]">
+        Cambiar correo
+      </h2>
+      <p className="mt-2 text-[15px] text-[var(--muted-foreground)] leading-relaxed">
+        Correo actual: <strong className="text-[var(--foreground)]">{currentEmail}</strong>
       </p>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
           <FormField
             control={form.control}
             name="newEmail"
@@ -63,6 +68,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
                     type="email"
                     placeholder="nuevo@correo.com"
                     disabled={isPending}
+                    className="border-[var(--border)] bg-[var(--background)]"
                   />
                 </FormControl>
                 <FormMessage />
@@ -71,7 +77,11 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
           />
           <FormError message={error} />
           <FormSuccess message={success} />
-          <Button type="submit" disabled={isPending} className="bg-black text-white hover:bg-zinc-800">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90"
+          >
             {isPending ? "Guardando…" : "Cambiar correo"}
           </Button>
         </form>

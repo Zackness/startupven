@@ -27,17 +27,16 @@ export default async function AdminTicketsPage({
     usuario?: string;
     fecha?: string;
     cedula?: string;
-    expediente?: string;
   }>;
 }) {
-  const { page, tipo, usuario, fecha, cedula, expediente } = await searchParams;
+  const { page, tipo, usuario, fecha, cedula } = await searchParams;
   const pageNum = Math.max(0, parseInt(page ?? "0", 10));
   const pageSize = 20;
   const todayStart = getTodayStartUTC();
   const [users, types, ticketsResult] = await Promise.all([
     getAdminUsersForTicketsFilter(),
     getAdminTicketTypes(),
-    getAdminTicketsFiltered(pageNum, pageSize, { tipo, usuario, fecha, cedula, expediente }),
+    getAdminTicketsFiltered(pageNum, pageSize, { tipo, usuario, fecha, cedula }),
   ]);
   const { tickets, total } = ticketsResult;
   const totalPages = Math.ceil(total / pageSize);
@@ -49,100 +48,93 @@ export default async function AdminTicketsPage({
     if (usuario) params.set("usuario", usuario);
     if (fecha) params.set("fecha", fecha);
     if (cedula) params.set("cedula", cedula);
-    if (expediente) params.set("expediente", expediente);
     return `/admin/tickets?${params.toString()}`;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-12 sm:space-y-14">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-black">
-            Tickets vendidos
-          </h1>
-          <p className="mt-1 text-zinc-600">
-            Listado de todos los tickets y estado de canje
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Operación</p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">Tickets vendidos</h1>
+          <p className="mt-3 text-[15px] text-[var(--muted-foreground)] max-w-xl leading-relaxed">
+            Listado de todos los tickets y estado de canje.
           </p>
         </div>
         <Link href={`${ADMIN_PATH}/escaneo`}>
-          <Button className="gap-2 bg-black text-white hover:bg-zinc-800">
+          <Button className="shrink-0 gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-[var(--primary-foreground)] hover:opacity-90">
             <QrCode className="h-4 w-4" />
             Escanear QR
           </Button>
         </Link>
-      </div>
+      </section>
 
-      <TicketFilters
-        users={users}
-        types={types.map((t) => ({ id: t.id, name: t.name }))}
-        initial={{ tipo, usuario, fecha, cedula, expediente }}
-      />
+      <section>
+        <p className="mb-6 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Filtros</p>
+        <TicketFilters
+          users={users}
+          types={types.map((t) => ({ id: t.id, name: t.name }))}
+          initial={{ tipo, usuario, fecha, cedula }}
+        />
+      </section>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50">
-              <tr>
-                <th className="px-4 py-3 font-medium text-black">Usuario</th>
-                <th className="px-4 py-3 font-medium text-black">Vendedor</th>
-                <th className="px-4 py-3 font-medium text-black">Tipo</th>
-                <th className="px-4 py-3 font-medium text-black">Fecha menú</th>
-                <th className="px-4 py-3 font-medium text-black">Estado</th>
-                <th className="px-4 py-3 font-medium text-black">Pago</th>
-                <th className="px-4 py-3 font-medium text-black">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tickets.map((t) => (
-                (() => {
+      <section>
+        <p className="mb-6 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Listado</p>
+
+        <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] bg-[var(--muted)]/50">
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Usuario</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Vendedor</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Tipo</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Fecha menú</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Estado</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Pago</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Acción</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {tickets.map((t) => {
                   const isCancelled = !t.usedAt && t.mealDate < todayStart;
                   return (
-                    <tr key={t.id} className="border-b border-zinc-100">
+                    <tr key={t.id} className="hover:bg-[var(--muted)]/30 transition-colors">
                       <td className="px-4 py-3">
-                        <p className="font-medium text-black">{t.userName}</p>
-                        <p className="text-xs text-zinc-600">{t.userEmail}</p>
+                        <p className="font-medium text-[var(--foreground)]">{t.userName}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">{t.userEmail}</p>
                       </td>
                       <td className="px-4 py-3">
                         {t.sellerName || t.sellerEmail ? (
                           <div className="flex flex-col">
-                            <span className="font-medium text-black">{t.sellerName ?? "—"}</span>
-                            <span className="text-xs text-zinc-600">{t.sellerEmail ?? ""}</span>
+                            <span className="font-medium text-[var(--foreground)]">{t.sellerName ?? "—"}</span>
+                            <span className="text-xs text-[var(--muted-foreground)]">{t.sellerEmail ?? ""}</span>
                           </div>
                         ) : (
-                          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700">
-                            Compra web
-                          </span>
+                          <span className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--muted-foreground)]">Compra web</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-zinc-700">{t.ticketTypeName}</td>
-                      <td className="px-4 py-3 text-zinc-700">{formatDate(t.mealDate)}</td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">{t.ticketTypeName}</td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">{formatDate(t.mealDate)}</td>
                       <td className="px-4 py-3">
                         {t.paymentStatus === "PENDIENTE" ? (
-                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                            Pendiente de Pago
-                          </span>
+                          <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">Pendiente de pago</span>
                         ) : t.usedAt ? (
-                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                            Canjeado
-                          </span>
+                          <span className="rounded-full bg-green-500/15 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">Canjeado</span>
                         ) : isCancelled ? (
-                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
-                            Vencido
-                          </span>
+                          <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">Vencido</span>
                         ) : (
-                          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                            Comprado
-                          </span>
+                          <span className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--foreground)]">Comprado</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         {t.paymentReference || t.paymentBank ? (
                           <div className="flex flex-col">
-                            <span className="font-medium text-black">{t.paymentReference}</span>
-                            <span className="text-xs text-zinc-500">{t.paymentBank}</span>
+                            <span className="font-medium text-[var(--foreground)]">{t.paymentReference}</span>
+                            <span className="text-xs text-[var(--muted-foreground)]">{t.paymentBank}</span>
                           </div>
                         ) : (
-                          <span className="text-zinc-400">-</span>
+                          <span className="text-[var(--muted-foreground)]">—</span>
                         )}
                       </td>
                       <td className="px-4 py-3 flex flex-wrap gap-2">
@@ -151,52 +143,44 @@ export default async function AdminTicketsPage({
                         ) : !t.usedAt && !isCancelled ? (
                           <MarkUsedButton ticketId={t.id} />
                         ) : isCancelled ? (
-                          <span className="text-xs text-zinc-500">Vencido</span>
+                          <span className="text-xs text-[var(--muted-foreground)]">Vencido</span>
                         ) : null}
                         <Link href={`${ADMIN_PATH}/tickets/${t.id}`}>
-                          <button className="inline-flex items-center rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50">
-                            Editar
-                          </button>
+                          <Button variant="outline" size="sm" className="border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Editar</Button>
                         </Link>
                         <DeleteTicketButton ticketId={t.id} />
                       </td>
                     </tr>
                   );
-                })()
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {tickets.length === 0 && (
-          <div className="px-4 py-12 text-center text-zinc-600">
-            No hay tickets registrados
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {pageNum > 0 && (
-            <a
-              href={pageHref(pageNum - 1)}
-              className="rounded-md border border-zinc-300 px-3 py-1 text-sm text-black hover:bg-zinc-50"
-            >
-              Anterior
-            </a>
-          )}
-          <span className="px-3 py-1 text-sm text-zinc-600">
-            Página {pageNum + 1} de {totalPages}
-          </span>
-          {pageNum < totalPages - 1 && (
-            <a
-              href={pageHref(pageNum + 1)}
-              className="rounded-md border border-zinc-300 px-3 py-1 text-sm text-black hover:bg-zinc-50"
-            >
-              Siguiente
-            </a>
+          {tickets.length === 0 && (
+            <div className="px-4 py-12 text-center text-[var(--muted-foreground)]">No hay tickets registrados.</div>
           )}
         </div>
-      )}
+
+        {totalPages > 1 && (
+          <nav className="mt-6 flex justify-center gap-2" aria-label="Paginación">
+            {pageNum > 0 ? (
+              <a href={pageHref(pageNum - 1)} className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]">
+                Anterior
+              </a>
+            ) : (
+              <span className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--muted-foreground)]">Anterior</span>
+            )}
+            <span className="flex items-center px-4 py-2 text-sm text-[var(--muted-foreground)]">Página {pageNum + 1} de {totalPages}</span>
+            {pageNum < totalPages - 1 ? (
+              <a href={pageHref(pageNum + 1)} className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]">
+                Siguiente
+              </a>
+            ) : (
+              <span className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--muted-foreground)]">Siguiente</span>
+            )}
+          </nav>
+        )}
+      </section>
     </div>
   );
 }

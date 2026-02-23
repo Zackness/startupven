@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Proyecto } from "@/data/proyectos";
+import { ProyectoPreviewIframe } from "@/components/proyecto-preview-iframe";
 
 type Variant = "featured" | "grid";
 
@@ -21,14 +22,14 @@ export function ProyectoCard({
   const isFeatured = variant === "featured";
   const content = (
     <article
-      className={`group relative overflow-hidden rounded-md border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/15 ${
+      className={`group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/15 hover:shadow-sm ${
         isFeatured
           ? "min-h-[300px] sm:min-h-[340px]"
           : "min-h-[260px] sm:min-h-[300px]"
       }`}
     >
-      {/* Imagen o placeholder */}
-      <div className={`relative w-full bg-[var(--muted)] ${isFeatured ? "h-48 sm:h-52" : "h-40 sm:h-44"}`}>
+      {/* Imagen, vista previa del sitio (iframe) o placeholder */}
+      <div className={`relative w-full overflow-hidden bg-[var(--muted)] ${isFeatured ? "h-48 sm:h-52" : "h-40 sm:h-44"}`}>
         {proyecto.imagen ? (
           <Image
             src={proyecto.imagen}
@@ -36,6 +37,12 @@ export function ProyectoCard({
             fill
             className="object-cover"
             sizes={isFeatured ? "(min-width: 640px) 50vw, 100vw" : "(min-width: 640px) 33vw, 100vw"}
+          />
+        ) : proyecto.url ? (
+          <ProyectoPreviewIframe
+            url={proyecto.url}
+            title={proyecto.titulo}
+            className="absolute inset-0"
           />
         ) : (
           <div className="absolute inset-0 bg-[var(--muted)]" />

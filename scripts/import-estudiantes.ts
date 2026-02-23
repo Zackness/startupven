@@ -14,7 +14,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import bcrypt from "bcryptjs";
 import { db } from "../lib/db";
-import { UserRole, Gremio } from "../lib/generated/prisma/enums";
+import { UserRole } from "../lib/generated/prisma/enums";
 
 const MD_PATH = join(process.cwd(), "estudiantes_matricula_20252.md");
 const PASSWORD_PLAIN = "123456";
@@ -104,7 +104,6 @@ async function main() {
 
   const toInsert: {
     cedula: string;
-    expediente: string;
     primerNombre: string;
     segundoNombre: string | null;
     primerApellido: string;
@@ -134,7 +133,6 @@ async function main() {
 
     toInsert.push({
       cedula: r.cedula,
-      expediente: r.expediente,
       primerNombre,
       segundoNombre: segundoNombre || null,
       primerApellido,
@@ -158,9 +156,7 @@ async function main() {
           name: u.name,
           emailVerified: true,
           role: UserRole.CLIENTE,
-          gremio: Gremio.ESTUDIANTIL,
           cedula: u.cedula,
-          expediente: u.expediente,
           primerNombre: u.primerNombre,
           segundoNombre: u.segundoNombre,
           primerApellido: u.primerApellido,
