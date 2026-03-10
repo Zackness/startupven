@@ -14,6 +14,7 @@ const serviciosItems = [
 
 const nav = [
   { href: "/", label: "Inicio" },
+  { href: "/paginas-web", label: "Páginas web" },
   { href: "/proyectos", label: "Proyectos" },
   { href: "/contacto", label: "Contacto" },
 ];

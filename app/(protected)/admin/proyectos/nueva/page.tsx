@@ -1,9 +1,16 @@
 import { Link } from "@/components/link";
 import { ADMIN_PATH } from "@/routes";
 import { ProjectForm } from "../project-form";
+import { getClientsForAssignment } from "@/lib/actions/users";
+import { getAdminServicePackages } from "@/lib/actions/admin-service-packages";
 import { ArrowLeft } from "lucide-react";
 
-export default function NuevaProyectoPage() {
+export default async function NuevaProyectoPage() {
+  const [clients, catalogPackages] = await Promise.all([
+    getClientsForAssignment(),
+    getAdminServicePackages(),
+  ]);
+
   return (
     <div className="space-y-12 sm:space-y-14">
       <section>
@@ -21,12 +28,12 @@ export default function NuevaProyectoPage() {
           Crear proyecto
         </h1>
         <p className="mt-3 text-[15px] text-[var(--muted-foreground)] max-w-xl leading-relaxed">
-          El proyecto aparecerá en la página pública /proyectos. Puedes subir una imagen por URL.
+          El proyecto aparecerá en la página pública /proyectos. Puedes subir una imagen por URL y asignar clientes.
         </p>
       </section>
 
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
-        <ProjectForm mode="create" />
+        <ProjectForm mode="create" clients={clients} catalogPackages={catalogPackages} />
       </div>
     </div>
   );

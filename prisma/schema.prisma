@@ -39,6 +39,10 @@ model User {
   segundoNombre    String?
   primerApellido   String?
   segundoApellido  String?
+  telefono         String?   @db.VarChar(32)
+  onboardingCompletedAt DateTime?
+  /** IDs de paquetes elegidos en onboarding (JSON array de strings). */
+  onboardingSelectedPackageIds Json?
   accounts         Account[]
   sessions         Session[]
   tickets          Ticket[]           @relation("TicketBuyer")
@@ -46,11 +50,17 @@ model User {
   wallet           WalletTransaction[]
   paymentReports   PaymentReport[]
   withdrawalRequests WithdrawalRequest[]
+  extraCharges     ExtraCharge[]
   balance          Decimal   @default(0) @db.Decimal(10, 2)
   requiresEmailChange    Boolean @default(false) // Obligar a cambiar si es temporal (no institucional)
   requiresPasswordChange Boolean @default(false) // Obligar a cambiar si sigue con contraseña por defecto
   supportTickets   SupportTicket[]
   supportTicketMessages SupportTicketMessage[]
+  editorialPosts   EditorialPost[]
+  editorialPostsCreated EditorialPost[] @relation("EditorialPostCreatedBy")
+  clientProjects        ClientProject[]
+  clientProjectsCreated ClientProject[] @relation("ClientProjectCreatedBy")
+  assignedPortfolioProjects ProjectUser[]
 }
 
 // Lugar de la comida: cantina o comedor
@@ -138,12 +148,46 @@ model PaymentReport {
   bank        String?             // Opcional si es Stripe/PayPal
   reference   String
   status      PaymentReportStatus @default(PENDIENTE)
+  /** Cuando method es PAGO_MOVIL: monto abonado en bolívares (para contabilidad). */
+  amountPaidBs        Decimal?    @db.Decimal(14, 2)
+  /** Tasa USD → Bs al momento del pago (1 USD = X Bs). */
+  exchangeRateUsdToVes Decimal?    @db.Decimal(12, 4)
+  /** Fecha/hora en que se obtuvo la tasa (contabilidad). */
+  exchangeRateFetchedAt DateTime?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   
   user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
+}
+
+enum ExtraChargeStatus {
+  PENDIENTE
+  FACTURADO
+  PAGADO
+  CANCELADO
+}
+
+/// Cargos extra asociados a un cliente para servicios específicos (Scale, marketing, redes, etc.).
+model ExtraCharge {
+  id          String            @id @default(cuid())
+  userId      String
+  /** Categoría/servicio al que se asocia el cargo: SCALE/WEB, MARKETING, REDES_SOCIALES, etc. */
+  category    String
+  /** Título corto del cargo (ej. “Landing adicional”, “Horas extra diseño”). */
+  label       String
+  /** Detalle del trabajo o alcance. */
+  description String?           @db.Text
+  amount      Decimal           @db.Decimal(10, 2)
+  status      ExtraChargeStatus @default(PENDIENTE)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }
 
 enum WithdrawalRequestStatus {
@@ -254,18 +298,162 @@ model SupportTicketMessage {
   @@index([supportTicketId])
 }
 
-/** Proyectos del portafolio público (web). Admin/Editor los crean; se muestran en /proyectos. */
+/// Publicaciones del calendario editorial (RRSS) por usuario o por proyecto.
+model EditorialPost {
+  id          String   @id @default(cuid())
+  userId      String?  // Dueño del calendario (cliente); null si es solo por proyecto
+  projectId   String?  // Proyecto al que pertenece el cronograma; si está definido, el calendario es por proyecto
+  createdById String?  // Usuario que creó/actualizó (ej. agencia)
+
+  date        DateTime @db.Date
+  time        String?  @db.VarChar(8) // HH:mm
+
+  platform    String   // Instagram, Facebook, TikTok, X, LinkedIn, YouTube, Blog, Otro
+  type        String   // Reel, Post, Historia, etc.
+  title       String
+  caption     String?  @db.Text
+  week        String?
+  format      String?  // BTS, Lifestyle, etc.
+  objective   String?  @db.Text
+  cta         String?
+  kpi         String?
+  status      String   // Publicado, Programado, Pendiente de diseño, etc.
+  link        String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User?    @relation("EditorialPostCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([projectId, date])
+}
+
+/** Proyectos del portafolio (admin). Admin/Editor los crean; se muestran en /proyectos (público). */
 model Project {
   id          String   @id @default(cuid())
   titulo      String
   descripcion String   @db.Text
-  tipo        String   // ej. "Página web", "Plataforma", "E-commerce"
+  tipo        String   // ej. "Página web", "Plataforma", "E-commerce" (se sigue mostrando en front)
   año         String
   imagen      String?  // URL de imagen (opcional)
   url         String?  // URL del sitio en vivo: se renderiza como vista previa si no hay imagen
   orden       Int      @default(0) // Para destacados: menor = más arriba
+  /** Categorías del proyecto (varias permitidas): WEB, MARKETING, REDES_SOCIALES. Solo admin; aún no en front. */
+  categorias  Json?    // string[] ej. ["WEB", "MARKETING"]
+  /** Si es true, el proyecto se muestra en /proyectos y en destacados de la página principal. */
+  public      Boolean  @default(true)
+  /** Si es true, el proyecto aparece como suspendido en el escritorio del cliente. */
+  suspended   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  portfolioItems   ProjectPortfolioItem[]
+  assignedUsers    ProjectUser[]
+  projectPackages  ProjectPackage[]
+  editorialPosts   EditorialPost[]
+
   @@index([orden])
+}
+
+/// Ítems del portafolio de un proyecto: fotos/vídeos de redes (Instagram, Behance, etc.) o enlaces directos.
+model ProjectPortfolioItem {
+  id        String  @id @default(cuid())
+  projectId String
+  /** Tipo de recurso para elegir cómo renderizar. */
+  type      String  // INSTAGRAM, BEHANCE, IMAGE, VIDEO, YOUTUBE, VIMEO
+  /** URL del post, imagen, vídeo o embed. */
+  url       String  @db.VarChar(2048)
+  orden     Int     @default(0)
+  caption   String? @db.VarChar(512)
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+/// Asignación de usuarios (clientes) a proyectos del portafolio. Un proyecto puede tener varios clientes asignados.
+model ProjectUser {
+  projectId String
+  userId    String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+  @@index([userId])
+}
+
+/// Servicios (paquetes) asignados a un proyecto. El usuario asigna desde /escritorio/servicios.
+model ProjectPackage {
+  id            String    @id @default(cuid())
+  projectId     String
+  packageId     String    // ID del paquete en service-packages (ej. LAUNCH_BASICO)
+  suspended     Boolean   @default(false)
+  durationMonths Int     @default(1) // Duración del periodo en meses (configurable)
+  endsAt        DateTime? // Cuándo finaliza el periodo del servicio (para renovación)
+  cancelledAt   DateTime? // Si se cancela, ya no se renueva
+  createdAt     DateTime  @default(now())
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, packageId])
+  @@index([projectId])
+}
+
+/// Catálogo de paquetes/servicios (Launch, Build, Scale, etc.). Admin CRUD en /admin/servicios.
+/// El id es estable (ej. LAUNCH_BASICO) para referencias en onboardingSelectedPackageIds y ProjectPackage.packageId.
+model ServicePackageCatalog {
+  id          String   @id // ej. LAUNCH_BASICO
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  category    String   // LAUNCH, BUILD, WEB, MARKETING, REDES_SOCIALES, BRANDING
+  description String?  @db.Text
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}
+
+/// Proyectos de clientes (sitios, campañas, RRSS, etc.) administrados por agencias (EDITOR/ADMIN).
+model ClientProject {
+  id          String   @id @default(cuid())
+  userId      String
+  createdById String?
+
+  name        String
+  slug        String   @unique
+  descripcion String?  @db.Text
+  tipo        String   // WEB, MARKETING, RRSS, etc.
+  status      String   // EN_PLANEACION, ACTIVO, PAUSADO, CERRADO, etc.
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdBy   User?    @relation("ClientProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+/// Cache del payload de onboarding para recuperar al volver de Stripe (return_url). Se borra tras usarlo.
+model StripeOnboardingPayload {
+  paymentIntentId String   @id
+  payload        Json
+  userId         String
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Cache del payload "crear proyecto" de escritorio para recuperar al volver de Stripe.
+model StripeEscritorioPayload {
+  paymentIntentId String   @id
+  payload        Json
+  userId         String
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
 }

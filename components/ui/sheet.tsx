@@ -37,7 +37,7 @@ const SheetContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 flex h-full w-80 flex-col gap-4 border border-zinc-200 bg-white p-4 text-black shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "fixed z-50 flex h-full w-80 flex-col gap-4 border border-[var(--border)] bg-[var(--background)] p-4 text-[var(--foreground)] shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out",
         side === "left" &&
           "inset-y-0 left-0 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left",
         side === "right" &&
@@ -50,7 +50,7 @@ const SheetContent = React.forwardRef<
       )}
       {...props}
     >
-      <SheetClose className="absolute right-3 top-3 rounded-md p-2 text-zinc-500 hover:bg-zinc-100 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
+      <SheetClose className="absolute right-3 top-3 rounded-md p-2 text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
         <X className="h-4 w-4" />
         <span className="sr-only">Cerrar</span>
       </SheetClose>
@@ -68,7 +68,7 @@ function SheetTitle({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
-  return <DialogPrimitive.Title className={cn("text-base font-semibold", className)} {...props} />;
+  return <DialogPrimitive.Title className={cn("text-base font-semibold text-[var(--foreground)]", className)} {...props} />;
 }
 
 function SheetDescription({
@@ -76,7 +76,7 @@ function SheetDescription({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>) {
   return (
-    <DialogPrimitive.Description className={cn("text-sm text-zinc-600", className)} {...props} />
+    <DialogPrimitive.Description className={cn("text-sm text-[var(--muted-foreground)]", className)} {...props} />
   );
 }
 

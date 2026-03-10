@@ -48,6 +48,26 @@ export async function getMySupportTickets() {
   }));
 }
 
+/** Lista los tickets de un cliente (solo EDITOR o ADMIN, para escritorio "trabajar como"). */
+export async function getSupportTicketsForClient(clientUserId: string) {
+  await requireAdminOrEditor();
+  const tickets = await db.supportTicket.findMany({
+    where: { userId: clientUserId },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      _count: { select: { messages: true } },
+    },
+  });
+  return tickets.map((t) => ({
+    id: t.id,
+    subject: t.subject,
+    status: t.status,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+    messageCount: t._count.messages,
+  }));
+}
+
 /** Obtiene un ticket con sus mensajes. El cliente solo puede ver los suyos. */
 export async function getSupportTicketWithMessages(id: string) {
   const { user } = await requireAuth();
@@ -204,7 +224,7 @@ export type SupportTicketsFilters = {
 /** Lista todos los tickets de soporte para admin/editor, con filtros opcionales. */
 export async function getSupportTicketsForAdmin(filters?: SupportTicketsFilters) {
   await requireAdminOrEditor();
-  const conditions: Parameters<typeof db.supportTicket.findMany>[0]["where"][] = [];
+  const conditions: any[] = [];
   if (filters?.status?.trim()) {
     const valid = VALID_STATUSES.includes(filters.status.trim() as (typeof VALID_STATUSES)[number]);
     if (valid) conditions.push({ status: filters.status.trim() as (typeof VALID_STATUSES)[number] });

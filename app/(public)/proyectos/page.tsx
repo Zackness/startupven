@@ -42,7 +42,7 @@ export default async function ProyectosPage() {
               Destacado
             </p>
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/15 hover:shadow-sm">
-              <Link href="/contacto" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 rounded-2xl">
+              <Link href={`/proyectos/${destacado.id}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 rounded-2xl">
                 <div className="grid overflow-hidden rounded-2xl sm:grid-cols-2">
                   <div className="relative h-52 min-h-[12rem] overflow-hidden bg-[var(--muted)] sm:h-64">
                     {destacado.imagen ? (
@@ -77,7 +77,7 @@ export default async function ProyectosPage() {
                       {destacado.descripcion}
                     </p>
                     <span className="mt-4 inline-flex items-center text-sm font-medium text-[var(--primary)]">
-                      Contactar →
+                      Ver proyecto →
                     </span>
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export default async function ProyectosPage() {
               </h2>
               <div className="mt-8 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
                 {resto.map((proyecto) => (
-                  <ProyectoCard key={proyecto.id} proyecto={proyecto} variant="grid" />
+                  <ProyectoCard key={proyecto.id} proyecto={proyecto} variant="grid" linkToProjectDetail />
                 ))}
               </div>
             </>

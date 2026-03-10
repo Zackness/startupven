@@ -46,9 +46,7 @@ export function Chatbot({
     sendMessage,
     status,
     error,
-  } = useChat({
-    api: "/api/chat",
-  });
+  } = useChat();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

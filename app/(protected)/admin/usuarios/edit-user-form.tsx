@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { updateUser, setUserPasswordAsAdmin } from "@/lib/actions/users";
+import { updateUser, setUserPasswordAsAdmin, deleteUser } from "@/lib/actions/users";
 import { ADMIN_PATH } from "@/routes";
 import { USER_ROLES } from "@/routes";
 import { FormError } from "@/components/form-error";
@@ -31,6 +31,23 @@ export function EditUserForm({ user }: { user: User }) {
   const [passwordError, setPasswordError] = useState<string | undefined>("");
   const [passwordSuccess, setPasswordSuccess] = useState<string | undefined>("");
   const [passwordPending, setPasswordPending] = useState(false);
+
+  function handleDelete() {
+    const confirmed = window.confirm(
+      "¿Seguro que quieres eliminar este usuario? Esta acción no se puede deshacer."
+    );
+    if (!confirmed) return;
+    setError("");
+    setSuccess("");
+    startTransition(async () => {
+      try {
+        await deleteUser(user.id);
+        router.push(`${ADMIN_PATH}/usuarios`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "No se pudo eliminar el usuario");
+      }
+    });
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -216,7 +233,7 @@ export function EditUserForm({ user }: { user: User }) {
         <FormError message={error} />
         <FormSuccess message={success} />
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             type="submit"
             disabled={isPending}
@@ -232,6 +249,14 @@ export function EditUserForm({ user }: { user: User }) {
             className="border-[var(--border)]"
           >
             Volver a la lista
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            Eliminar usuario
           </Button>
         </div>
       </form>

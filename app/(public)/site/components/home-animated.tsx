@@ -28,6 +28,25 @@ const ENFOQUE_ITEMS = [
   },
 ];
 
+const COMPLEMENTOS_ITEMS = [
+  {
+    title: "Marketing",
+    description: "Estrategia, campañas, analítica y optimización para adquisición y crecimiento.",
+  },
+  {
+    title: "Diseño gráfico",
+    description: "Identidad, piezas para campañas y sistema visual consistente para tu marca.",
+  },
+  {
+    title: "Redes sociales",
+    description: "Planificación, contenido y métricas para presencia constante y efectiva.",
+  },
+  {
+    title: "Branding",
+    description: "Identidad de marca, naming, logotipo y sistema visual para posicionar tu proyecto.",
+  },
+];
+
 type HomeAnimatedProps = { destacados: Proyecto[] };
 
 export function HomeAnimated({ destacados }: HomeAnimatedProps) {
@@ -39,6 +58,7 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
   const ladderRef = useRef<HTMLElement>(null);
   const aiLaunchRef = useRef<HTMLElement>(null);
   const enfoqueRef = useRef<HTMLElement>(null);
+  const complementosRef = useRef<HTMLElement>(null);
   const whyRef = useRef<HTMLElement>(null);
   const proyectosRef = useRef<HTMLElement>(null);
   const evolutionRef = useRef<HTMLElement>(null);
@@ -53,6 +73,7 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
     const ladder = ladderRef.current;
     const aiLaunch = aiLaunchRef.current;
     const enfoque = enfoqueRef.current;
+    const complementos = complementosRef.current;
     const why = whyRef.current;
     const proyectos = proyectosRef.current;
     const evolution = evolutionRef.current;
@@ -230,6 +251,9 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
           }
         );
       }
+
+      // Complementos: título + cards en stagger
+      sectionWithStagger(complementos, ".complementos-card", { stagger: 0.12, y: 32 });
 
       // Evolution: texto + botones
       if (evolution) {
@@ -474,6 +498,47 @@ export function HomeAnimated({ destacados }: HomeAnimatedProps) {
             >
               Ver todos los servicios →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Complementos del ecosistema — visible solo en landing + /servicios */}
+      <section
+        ref={complementosRef}
+        className="border-t border-[var(--border)] bg-[var(--muted)]/20 px-4 py-20 sm:px-6 md:py-24"
+      >
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <span className="inline-flex rounded-full border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-1 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+              Complementos
+            </span>
+            <h2 className="mt-4 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+              Servicios complementarios
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-[var(--muted-foreground)]">
+              Marketing, diseño y redes para potenciar tu presencia y crecimiento sobre la infraestructura.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {COMPLEMENTOS_ITEMS.map((item) => (
+              <div
+                key={item.title}
+                className="complementos-card rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--card-foreground)] transition-transform duration-300 hover:translate-y-[-2px]"
+              >
+                <h3 className="text-lg font-semibold text-[var(--foreground)]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">{item.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Button asChild size="lg" className="rounded-xl border border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90">
+              <Link href="/contacto">Solicitar complemento</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-[var(--border)]">
+              <Link href="/servicios#complementarios">Ver detalle</Link>
+            </Button>
           </div>
         </div>
       </section>

@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { UserButton } from "@/app/(auth)/components/user-button";
-import { EscritorioSidebar } from "./escritorio-sidebar";
+import { EscritorioSidebarWrapper } from "./escritorio-sidebar-wrapper";
 import { SidebarShell } from "@/components/layout/sidebar-shell";
 import { ChatbotFab } from "@/components/chatbot-fab";
 
@@ -20,7 +20,7 @@ export default async function EscritorioLayout({
       title="STVN"
       subtitle="Escritorio · Sistema estructurado"
       maxWidthClass="max-w-6xl"
-      nav={<EscritorioSidebar role={role} />}
+      nav={<EscritorioSidebarWrapper role={role} />}
       headerRight={
         <>
           <span className="hidden text-sm text-[var(--muted-foreground)] sm:inline">{session.user.name}</span>

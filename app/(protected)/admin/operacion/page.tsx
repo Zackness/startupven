@@ -1,10 +1,12 @@
 import { Link } from "@/components/link";
 import { ADMIN_PATH, VENDEDOR_PATH } from "@/routes";
-import { Ticket, ShoppingCart, ClipboardList, QrCode, UtensilsCrossed, ArrowRight } from "lucide-react";
+import { Ticket, ShoppingCart, ClipboardList, QrCode, UtensilsCrossed, ArrowRight, CreditCard } from "lucide-react";
 
 const ventasItems = [
   { href: `${ADMIN_PATH}/tickets`, label: "Tickets vendidos", desc: "Listado, estado de canje y pago", icon: Ticket },
   { href: `${ADMIN_PATH}/ventas-pendientes`, label: "Ventas pendientes", desc: "Aprobar y registrar ventas manuales", icon: ClipboardList },
+  { href: `${ADMIN_PATH}/pagos`, label: "Pagos reportados", desc: "Aprobar pagos móviles y recargas", icon: CreditCard },
+  { href: `${ADMIN_PATH}/cargos-extra`, label: "Cargos extra", desc: "Crear cargos adicionales por cliente", icon: CreditCard },
   { href: VENDEDOR_PATH, label: "Vender", desc: "Registrar venta de tickets en punto de venta", icon: ShoppingCart },
 ] as const;
 

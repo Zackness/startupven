@@ -9,7 +9,7 @@ import { SignOutSidebarItem } from "@/components/sign-out-sidebar-item";
 
 const items = [
   { href: EDITOR_PATH, label: "Panel", icon: LayoutDashboard },
-  { href: `${ADMIN_PATH}/proyectos`, label: "Proyectos web", icon: FolderKanban },
+  { href: `${ADMIN_PATH}/proyectos`, label: "Proyectos", icon: FolderKanban },
   { href: `${ADMIN_PATH}/escaneo`, label: "Escanear QR", icon: QrCode },
   { href: `${ADMIN_PATH}/almuerzos`, label: "Platos", icon: UtensilsCrossed },
   { href: ESCRITORIO_PATH, label: "Escritorio", icon: Home },

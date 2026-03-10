@@ -10,14 +10,17 @@ type Variant = "featured" | "grid";
 interface ProyectoCardProps {
   proyecto: Proyecto;
   variant?: Variant;
-  /** Si es false, no envuelve en Link (solo contenido). */
+  /** Si es true, la tarjeta enlaza a la lista /proyectos. */
   linkToProyectos?: boolean;
+  /** Si es true, la tarjeta enlaza a la página del proyecto /proyectos/[id]. Requiere proyecto.id. */
+  linkToProjectDetail?: boolean;
 }
 
 export function ProyectoCard({
   proyecto,
   variant = "grid",
   linkToProyectos = false,
+  linkToProjectDetail = false,
 }: ProyectoCardProps) {
   const isFeatured = variant === "featured";
   const content = (
@@ -71,9 +74,25 @@ export function ProyectoCard({
             Ver proyectos →
           </span>
         )}
+        {linkToProjectDetail && proyecto.id && (
+          <span className="mt-2 inline-flex items-center text-xs font-medium text-[var(--primary)]">
+            Ver proyecto →
+          </span>
+        )}
       </div>
     </article>
   );
+
+  if (linkToProjectDetail && proyecto.id) {
+    return (
+      <Link
+        href={`/proyectos/${proyecto.id}`}
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 rounded-md"
+      >
+        {content}
+      </Link>
+    );
+  }
 
   if (linkToProyectos) {
     return (

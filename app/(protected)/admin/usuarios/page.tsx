@@ -1,8 +1,8 @@
 import { getAdminUsers } from "@/lib/actions/users";
 import { Link } from "@/components/link";
-import { ADMIN_PATH } from "@/routes";
+import { ADMIN_PATH, ESCRITORIO_PARA_PATH } from "@/routes";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Briefcase } from "lucide-react";
 import { CreateUserForm } from "./create-user-form";
 
 const roleLabels: Record<string, string> = {
@@ -29,6 +29,12 @@ function fullName(u: {
     return parts.join(" ") || u.name || "—";
   }
   return u.name || "—";
+}
+
+function isDeudor(balance: unknown): boolean {
+  if (balance == null) return false;
+  const n = Number(balance);
+  return !Number.isNaN(n) && n < 0;
 }
 
 export default async function AdminUsuariosPage({
@@ -93,43 +99,81 @@ export default async function AdminUsuariosPage({
         </p>
         <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] text-left text-sm">
+            <table className="w-full min-w-[960px] text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--muted)]/50">
                   <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Nombre</th>
                   <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Email</th>
                   <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Cédula</th>
                   <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Rol</th>
-                  <th className="w-[100px] px-4 py-3 font-semibold text-[var(--foreground)]">Acciones</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Onboarding</th>
+                  <th className="px-4 py-3 font-semibold text-[var(--foreground)]">Deudor</th>
+                  <th className="w-[180px] px-4 py-3 font-semibold text-[var(--foreground)]">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-[var(--muted)]/30 transition-colors">
-                    <td className="px-4 py-3 text-[var(--foreground)]">{fullName(u)}</td>
-                    <td className="px-4 py-3 text-[var(--muted-foreground)]">{u.email}</td>
-                    <td className="px-4 py-3 text-[var(--muted-foreground)]">{u.cedula ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={
-                          u.role === "ADMIN"
-                            ? "rounded bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
-                            : "rounded bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--muted-foreground)]"
-                        }
-                      >
-                        {roleLabels[u.role] ?? u.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link href={`${ADMIN_PATH}/usuarios/${u.id}`}>
-                        <Button variant="ghost" size="sm" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-                          <Pencil className="h-4 w-4" />
-                          Editar
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {users.map((u) => {
+                  const onboardingOk = !!u.onboardingCompletedAt;
+                  const deudor = isDeudor(u.balance);
+                  return (
+                    <tr key={u.id} className="hover:bg-[var(--muted)]/30 transition-colors">
+                      <td className="px-4 py-3 text-[var(--foreground)]">{fullName(u)}</td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">{u.email}</td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">{u.cedula ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={
+                            u.role === "ADMIN"
+                              ? "rounded bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
+                              : "rounded bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--muted-foreground)]"
+                          }
+                        >
+                          {roleLabels[u.role] ?? u.role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {onboardingOk ? (
+                          <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                            Sí
+                          </span>
+                        ) : (
+                          <span className="rounded bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                            No
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {deudor ? (
+                          <span className="rounded bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">
+                            Sí
+                          </span>
+                        ) : (
+                          <span className="rounded bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--muted-foreground)]">
+                            No
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          {u.role !== "ADMIN" && (
+                            <Link href={`${ESCRITORIO_PARA_PATH}/${u.id}`}>
+                              <Button variant="default" size="sm" className="gap-1.5">
+                                <Briefcase className="h-3.5 w-3.5" />
+                                Trabajar
+                              </Button>
+                            </Link>
+                          )}
+                          <Link href={`${ADMIN_PATH}/usuarios/${u.id}`}>
+                            <Button variant="ghost" size="sm" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                              <Pencil className="h-4 w-4" />
+                              Editar
+                            </Button>
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

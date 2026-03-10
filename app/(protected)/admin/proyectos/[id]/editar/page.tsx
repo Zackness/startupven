@@ -1,8 +1,12 @@
 import { Link } from "@/components/link";
 import { notFound } from "next/navigation";
-import { getProjectById } from "@/lib/actions/projects";
+import { getProjectById, getProjectPackagesForAdmin } from "@/lib/actions/projects";
+import { getClientsForAssignment } from "@/lib/actions/users";
+import { getAdminServicePackages } from "@/lib/actions/admin-service-packages";
 import { ADMIN_PATH } from "@/routes";
 import { ProjectForm } from "../../project-form";
+import { ProjectPortfolioSection } from "./_components/project-portfolio-section";
+import { ProjectServicesSection } from "./_components/project-services-section";
 import { ArrowLeft } from "lucide-react";
 
 export default async function EditarProyectoPage({
@@ -11,7 +15,12 @@ export default async function EditarProyectoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  const [project, clients, projectPackages, catalogPackages] = await Promise.all([
+    getProjectById(id),
+    getClientsForAssignment(),
+    getProjectPackagesForAdmin(id),
+    getAdminServicePackages(),
+  ]);
   if (!project) notFound();
 
   return (
@@ -39,6 +48,7 @@ export default async function EditarProyectoPage({
         <ProjectForm
           mode="edit"
           projectId={id}
+          clients={clients}
           initialData={{
             titulo: project.titulo,
             descripcion: project.descripcion,
@@ -47,7 +57,26 @@ export default async function EditarProyectoPage({
             imagen: project.imagen,
             url: project.url,
             orden: project.orden,
+            categorias: project.categorias,
+            public: project.public,
+            assignedUserIds: project.assignedUserIds ?? [],
           }}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+        <ProjectServicesSection
+          projectId={id}
+          initialPackages={projectPackages}
+          catalogPackages={catalogPackages.map((p) => ({ id: p.id, name: p.name, category: p.category }))}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+        <ProjectPortfolioSection
+          projectId={id}
+          initialItems={project.portfolioItems ?? []}
+          projectTitle={project.titulo}
         />
       </div>
     </div>

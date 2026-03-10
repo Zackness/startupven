@@ -24,7 +24,7 @@ export default async function AdminPage() {
             Panel editor
           </h1>
           <p className="mt-3 text-[15px] text-[var(--muted-foreground)] max-w-xl leading-relaxed">
-            Gestiona proyectos web, escaneo y platos.
+            Gestiona proyectos, escaneo y platos.
           </p>
         </section>
         <section>
@@ -43,7 +43,7 @@ export default async function AdminPage() {
                 <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
               <div className="mt-6">
-                <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Proyectos web</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Proyectos</p>
                 <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">{projects.length}</p>
               </div>
             </Link>
@@ -110,7 +110,7 @@ export default async function AdminPage() {
               <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
             <div className="mt-6">
-              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Proyectos web</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Proyectos</p>
               <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-[var(--foreground)]">{projects.length}</p>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">Publicados en /proyectos</p>
             </div>
