@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { ESCRITORIO_PATH } from "@/routes";
+import { getLoginRedirect } from "@/routes";
 import { getAllServicePackagesFromDb } from "@/lib/actions/service-packages-db";
 import { OnboardingForm } from "./_components/onboarding-form";
 
@@ -27,7 +28,8 @@ export default async function OnboardingPage() {
   ]);
 
   if (!user) redirect(ESCRITORIO_PATH);
-  if (user.role === "ADMIN") redirect("/admin");
+  // Solo clientes hacen onboarding; el resto va a su área correspondiente
+  if (user.role !== "CLIENTE") redirect(getLoginRedirect(user.role));
   if (user.onboardingCompletedAt) redirect(ESCRITORIO_PATH);
 
   return (

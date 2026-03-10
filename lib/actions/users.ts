@@ -132,7 +132,7 @@ export async function createAdminUser(data: {
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
-  // Crear usuario con correo y contraseña temporales: obligar a cambiarlos en el primer acceso
+  // Crear usuario: sin forzar cambio de correo/contraseña para no chocar con onboarding
   const user = await db.user.create({
     data: {
       email,
@@ -144,8 +144,8 @@ export async function createAdminUser(data: {
       segundoNombre: data.segundoNombre ?? null,
       primerApellido: data.primerApellido ?? null,
       segundoApellido: data.segundoApellido ?? null,
-      requiresEmailChange: true,
-      requiresPasswordChange: true,
+      requiresEmailChange: false,
+      requiresPasswordChange: false,
     },
     select: { id: true, email: true },
   });

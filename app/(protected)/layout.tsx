@@ -1,9 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { CredentialsGuard } from "./credentials-guard";
 import { OnboardingGuard } from "./onboarding-guard";
-import { ONBOARDING_PATH } from "@/routes";
 
 export default async function ProtectedLayout({
   children,
@@ -17,28 +15,20 @@ export default async function ProtectedLayout({
     where: { id: session.user.id },
     select: {
       role: true,
-      requiresEmailChange: true,
-      requiresPasswordChange: true,
       onboardingCompletedAt: true,
     },
   });
 
-  // Obligatorio cambiar correo/contraseña para todos menos ADMIN (p. ej. usuarios creados por script)
-  const mustUpdateCredentials = !!(
-    user &&
-    user.role !== "ADMIN" &&
-    (user.requiresEmailChange || user.requiresPasswordChange)
-  );
+  // No forzamos cambio de credenciales para no chocar con el onboarding al crear usuarios desde admin.
 
-  // Onboarding: solo para roles que no son ADMIN y que no han completado el onboarding
+  // Onboarding: solo para clientes que aún no han completado sus datos
   const mustOnboarding =
     !!user &&
-    user.role !== "ADMIN" &&
+    user.role === "CLIENTE" &&
     user.onboardingCompletedAt == null;
 
   return (
     <>
-      <CredentialsGuard mustUpdate={mustUpdateCredentials} />
       <OnboardingGuard mustOnboarding={mustOnboarding} />
       {children}
     </>
